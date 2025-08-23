@@ -1,11 +1,14 @@
 import type { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify'
 import type { JWTPayload } from '../utils/auth.js'
 
-declare module 'fastify' {
-  interface FastifyRequest {
-    user?: JWTPayload
+declare module '@fastify/jwt' {
+  interface FastifyJWT {
+    payload: JWTPayload
+    user: JWTPayload
   }
-  
+}
+
+declare module 'fastify' {
   interface FastifyInstance {
     authenticate: typeof authenticate
   }
