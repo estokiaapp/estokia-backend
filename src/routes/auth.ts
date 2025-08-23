@@ -26,7 +26,7 @@ export async function authRoutes(fastify: FastifyInstance) {
             user: {
               type: 'object',
               properties: {
-                id: { type: 'number' },
+                id: { type: 'string' },
                 email: { type: 'string' },
                 name: { type: 'string' }
               }
@@ -69,7 +69,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         user: {
           id: user.id,
           email: user.email,
-          name: user.name || undefined
+          ...(user.name && { name: user.name })
         }
       }
 
@@ -89,7 +89,7 @@ export async function authRoutes(fastify: FastifyInstance) {
         200: {
           type: 'object',
           properties: {
-            id: { type: 'number' },
+            id: { type: 'string' },
             email: { type: 'string' },
             name: { type: 'string' },
             createdAt: { type: 'string' },

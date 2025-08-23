@@ -4,7 +4,6 @@ import swagger from '@fastify/swagger'
 import swaggerUi from '@fastify/swagger-ui'
 import jwt from '@fastify/jwt'
 import { userRoutes } from './routes/users.js'
-import { postRoutes } from './routes/posts.js'
 import { authRoutes } from './routes/auth.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { authenticate } from './middleware/auth.js'
@@ -72,7 +71,6 @@ async function start() {
 
     await fastify.register(authRoutes, { prefix: '/api' })
     await fastify.register(userRoutes, { prefix: '/api' })
-    await fastify.register(postRoutes, { prefix: '/api' })
 
     const port = process.env.PORT ? parseInt(process.env.PORT) : 3000
     const host = process.env.HOST || '0.0.0.0'

@@ -20,7 +20,7 @@ export async function userRoutes(fastify: FastifyInstance) {
           items: {
             type: 'object',
             properties: {
-              id: { type: 'number' },
+              id: { type: 'string' },
               email: { type: 'string' },
               name: { type: 'string' },
               createdAt: { type: 'string' },
@@ -39,7 +39,6 @@ export async function userRoutes(fastify: FastifyInstance) {
           name: true,
           createdAt: true,
           updatedAt: true,
-          posts: true
         }
       })
       return users
@@ -62,7 +61,7 @@ export async function userRoutes(fastify: FastifyInstance) {
     }
   }, async (request: FastifyRequest<{ Params: UserParams }>, reply: FastifyReply) => {
     try {
-      const userId = parseInt(request.params.id)
+      const userId = request.params.id
       const user = await prisma.user.findUnique({
         where: { id: userId },
         select: {
@@ -71,7 +70,6 @@ export async function userRoutes(fastify: FastifyInstance) {
           name: true,
           createdAt: true,
           updatedAt: true,
-          posts: true
         }
       })
       
@@ -146,7 +144,7 @@ export async function userRoutes(fastify: FastifyInstance) {
     }
   }, async (request: FastifyRequest<{ Params: UserParams; Body: UpdateUserRequest }>, reply: FastifyReply) => {
     try {
-      const userId = parseInt(request.params.id)
+      const userId = request.params.id
       const user = await prisma.user.update({
         where: { id: userId },
         data: request.body
@@ -173,7 +171,7 @@ export async function userRoutes(fastify: FastifyInstance) {
     }
   }, async (request: FastifyRequest<{ Params: UserParams }>, reply: FastifyReply) => {
     try {
-      const userId = parseInt(request.params.id)
+      const userId = request.params.id
       await prisma.user.delete({
         where: { id: userId }
       })

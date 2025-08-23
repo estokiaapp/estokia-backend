@@ -11,6 +11,6 @@ export async function comparePassword(password: string, hashedPassword: string):
 }
 
 export interface JWTPayload {
-  userId: number
+  userId: string
   email: string
 }

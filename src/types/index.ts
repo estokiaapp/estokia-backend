@@ -22,6 +22,35 @@ export interface UpdatePostRequest {
   published?: boolean
 }
 
+// Updated interfaces for EstokIA
+export interface CreateProductRequest {
+  name: string
+  sku: string
+  categoryId?: string
+  supplierId?: string
+  costPrice?: number
+  sellingPrice?: number
+  currentStock?: number
+  minimumStock?: number
+  maximumStock?: number
+  unitOfMeasure?: string
+  description?: string
+}
+
+export interface UpdateProductRequest {
+  name?: string
+  sku?: string
+  categoryId?: string
+  supplierId?: string
+  costPrice?: number
+  sellingPrice?: number
+  currentStock?: number
+  minimumStock?: number
+  maximumStock?: number
+  unitOfMeasure?: string
+  description?: string
+}
+
 export interface LoginRequest {
   email: string
   password: string
@@ -30,7 +59,7 @@ export interface LoginRequest {
 export interface LoginResponse {
   token: string
   user: {
-    id: number
+    id: string
     email: string
     name?: string
   }
