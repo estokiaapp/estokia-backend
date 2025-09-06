@@ -2,39 +2,13 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { PrismaClient } from '@prisma/client'
 import type { LoginRequest, LoginResponse } from '../types/index.js'
 import { comparePassword } from '../utils/auth.js'
+import { GET_CURRENT_USER, LOGIN_SCHEMA } from '../dto/request/index.ts'
 
 const prisma = new PrismaClient()
 
 export async function authRoutes(fastify: FastifyInstance) {
   fastify.post<{ Body: LoginRequest }>('/auth/login', {
-    schema: {
-      description: 'Login with email and password',
-      tags: ['auth'],
-      body: {
-        type: 'object',
-        required: ['email', 'password'],
-        properties: {
-          email: { type: 'string', format: 'email' },
-          password: { type: 'string', minLength: 6 }
-        }
-      },
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            token: { type: 'string' },
-            user: {
-              type: 'object',
-              properties: {
-                id: { type: 'string' },
-                email: { type: 'string' },
-                name: { type: 'string' }
-              }
-            }
-          }
-        }
-      }
-    }
+    schema: LOGIN_SCHEMA
   }, async (request: FastifyRequest<{ Body: LoginRequest }>, reply: FastifyReply) => {
     try {
       const { email, password } = request.body
@@ -81,23 +55,7 @@ export async function authRoutes(fastify: FastifyInstance) {
 
   fastify.get('/auth/me', {
     preHandler: [fastify.authenticate],
-    schema: {
-      description: 'Get current user profile',
-      tags: ['auth'],
-      security: [{ bearerAuth: [] }],
-      response: {
-        200: {
-          type: 'object',
-          properties: {
-            id: { type: 'string' },
-            email: { type: 'string' },
-            name: { type: 'string' },
-            createdAt: { type: 'string' },
-            updatedAt: { type: 'string' }
-          }
-        }
-      }
-    }
+    schema: GET_CURRENT_USER
   }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       if (!request.user) {
