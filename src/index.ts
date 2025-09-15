@@ -6,6 +6,7 @@ import jwt from '@fastify/jwt'
 import { userRoutes } from './routes/userRoutes.js'
 import { authRoutes } from './routes/authRoutes.js'
 import { productRoutes } from './routes/productRoutes.js'
+import { categoryRoutes } from './routes/categoryRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { authenticate } from './middleware/auth.js'
 
@@ -76,6 +77,7 @@ async function start() {
     await fastify.register(authRoutes, { prefix: '/api' })
     await fastify.register(userRoutes, { prefix: '/api' })
     await fastify.register(productRoutes, { prefix: '/api'})
+    await fastify.register(categoryRoutes, { prefix: '/api'})
 
     const port = process.env.PORT ? parseInt(process.env.PORT) : 3000
     const host = process.env.HOST || '0.0.0.0'
