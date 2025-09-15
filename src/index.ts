@@ -29,7 +29,10 @@ async function start() {
     fastify.decorate('authenticate', authenticate)
     
     await fastify.register(cors, {
-      origin: true
+      origin: ['http://localhost:3000', 'http://localhost:3001'],
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+      credentials: true
     })
 
     await fastify.register(swagger, {
