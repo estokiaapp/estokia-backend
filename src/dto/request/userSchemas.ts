@@ -7,7 +7,7 @@ export const GET_ALL_USERS_SCHEMA = {
           items: {
             type: 'object',
             properties: {
-              id: { type: 'string' },
+              id: { type: 'integer' },
               email: { type: 'string' },
               name: { type: 'string' },
               createdAt: { type: 'string' },
@@ -24,7 +24,7 @@ export const GET_USER_SCHEMA = {
       params: {
         type: 'object',
         properties: {
-          id: { type: 'string' }
+          id: { type: 'integer' }
         },
         required: ['id']
       }
@@ -51,7 +51,7 @@ export const UPDATE_USER_SCHEMA = {
       params: {
         type: 'object',
         properties: {
-          id: { type: 'string' }
+          id: { type: 'integer' }
         },
         required: ['id']
       },
@@ -71,7 +71,7 @@ export const DELETE_USER_SCHEMA = {
       params: {
         type: 'object',
         properties: {
-          id: { type: 'string' }
+          id: { type: 'integer' }
         },
         required: ['id']
       }

@@ -15,7 +15,12 @@ export class UserController {
 
   getUserById = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
     try {
-      const user = await this.userService.getUserById(request.params.id)
+      const userId = parseInt(request.params.id)
+      if (isNaN(userId)) {
+        return reply.status(400).send({ error: 'Invalid user ID' })
+      }
+      
+      const user = await this.userService.getUserById(userId)
       
       if (!user) {
         return reply.status(404).send({ error: 'User not found' })
@@ -42,7 +47,12 @@ export class UserController {
 
   updateUser = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
     try {
-      const user = await this.userService.updateUser(request.params.id, request.body)
+      const userId = parseInt(request.params.id)
+      if (isNaN(userId)) {
+        return reply.status(400).send({ error: 'Invalid user ID' })
+      }
+      
+      const user = await this.userService.updateUser(userId, request.body)
       reply.send(user)
     } catch (error: any) {
       if (error.message === 'User not found') {
@@ -57,7 +67,12 @@ export class UserController {
 
   deleteUser = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
     try {
-      await this.userService.deleteUser(request.params.id)
+      const userId = parseInt(request.params.id)
+      if (isNaN(userId)) {
+        return reply.status(400).send({ error: 'Invalid user ID' })
+      }
+      
+      await this.userService.deleteUser(userId)
       reply.status(204).send()
     } catch (error: any) {
       if (error.message === 'User not found') {

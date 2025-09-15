@@ -8,7 +8,7 @@ export class UserService {
     return await this.userRepository.findMany()
   }
 
-  async getUserById(id: string) {
+  async getUserById(id: number) {
     if (!id) throw new Error('User ID is required')
     return await this.userRepository.findById(id)
   }
@@ -31,7 +31,7 @@ export class UserService {
     })
   }
 
-  async updateUser(id: string, userData: any) {
+  async updateUser(id: number, userData: any) {
     if (!id) throw new Error('User ID is required')
 
     const existingUser = await this.userRepository.findById(id)
@@ -49,7 +49,7 @@ export class UserService {
     return await this.userRepository.update(id, userData)
   }
 
-  async deleteUser(id: string) {
+  async deleteUser(id: number) {
     if (!id) throw new Error('User ID is required')
 
     const existingUser = await this.userRepository.findById(id)

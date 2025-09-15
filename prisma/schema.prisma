@@ -50,7 +50,7 @@ enum SettingType {
 
 // Models
 model User {
-  id        String   @id @default(cuid())
+  id        Int      @id @default(autoincrement())
   name      String?
   email     String   @unique
   password  String
@@ -128,7 +128,7 @@ model Product {
 model StockMovement {
   id           String       @id @default(cuid())
   productId    String       @map("product_id")
-  userId       String       @map("user_id")
+  userId       Int          @map("user_id")
   type         MovementType
   quantity     Int
   unitPrice    Float?       @map("unit_price")
@@ -149,7 +149,7 @@ model StockMovement {
 model Sale {
   id          String     @id @default(cuid())
   saleNumber  String     @unique @map("sale_number")
-  userId      String     @map("user_id")
+  userId      Int        @map("user_id")
   totalAmount Float      @default(0) @map("total_amount")
   status      SaleStatus @default(PENDING)
   saleDate    DateTime   @default(now()) @map("sale_date")
@@ -202,7 +202,7 @@ model DemandForecast {
 model Alert {
   id        String        @id @default(cuid())
   productId String?       @map("product_id")
-  userId    String?       @map("user_id")
+  userId    Int?          @map("user_id")
   type      AlertType
   title     String
   message   String?

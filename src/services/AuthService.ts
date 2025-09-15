@@ -29,6 +29,11 @@ export class AuthService {
       throw new Error('User ID is required')
     }
 
-    return await this.userRepository.findById(userId)
+    const numericUserId = parseInt(userId)
+    if (isNaN(numericUserId)) {
+      throw new Error('Invalid user ID')
+    }
+
+    return await this.userRepository.findById(numericUserId)
   }
 }

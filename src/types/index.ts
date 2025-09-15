@@ -59,7 +59,7 @@ export interface LoginRequest {
 export interface LoginResponse {
   token: string
   user: {
-    id: string
+    id: number
     email: string
     name?: string
   }

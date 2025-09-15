@@ -15,7 +15,7 @@ export class UserRepository {
     })
   }
 
-  async findById(id: string) {
+  async findById(id: number) {
     return await prisma.user.findUnique({
       where: { id },
       select: {
@@ -47,14 +47,14 @@ export class UserRepository {
     })
   }
 
-  async update(id: string, userData: any) {
+  async update(id: number, userData: any) {
     return await prisma.user.update({
       where: { id },
       data: userData
     })
   }
 
-  async delete(id: string) {
+  async delete(id: number) {
     await prisma.user.delete({
       where: { id }
     })
