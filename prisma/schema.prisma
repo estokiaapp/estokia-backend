@@ -1,0 +1,234 @@
+// EstokIA - Inventory Management System
+// Prisma schema for SQLite
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Enums
+enum UserType {
+  ADMIN
+  OPERATOR
+}
+
+enum MovementType {
+  IN
+  OUT
+  ADJUSTMENT
+}
+
+enum SaleStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum AlertType {
+  LOW_STOCK
+  PREDICTED_STOCKOUT
+  STAGNANT_PRODUCT
+}
+
+enum AlertPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum SettingType {
+  INTEGER
+  STRING
+  BOOLEAN
+  JSON
+}
+
+// Models
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String?
+  email     String   @unique
+  password  String
+  type      UserType @default(OPERATOR)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  active    Boolean  @default(true)
+
+  stockMovements StockMovement[]
+  sales          Sale[]
+  alerts         Alert[]
+
+  @@map("users")
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Supplier {
+  id        String   @id @default(cuid())
+  name      String
+  taxId     String?  @unique @map("tax_id")
+  email     String?
+  phone     String?
+  address   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  active    Boolean  @default(true)
+
+  products Product[]
+
+  @@map("suppliers")
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  name          String
+  sku           String   @unique
+  categoryId    String?  @map("category_id")
+  supplierId    String?  @map("supplier_id")
+  costPrice     Float?   @map("cost_price")
+  sellingPrice  Float?   @map("selling_price")
+  currentStock  Int      @default(0) @map("current_stock")
+  minimumStock  Int      @default(0) @map("minimum_stock")
+  maximumStock  Int?     @map("maximum_stock")
+  unitOfMeasure String   @default("UN") @map("unit_of_measure")
+  description   String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  active        Boolean  @default(true)
+
+  category        Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  supplier        Supplier?        @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  stockMovements  StockMovement[]
+  saleItems       SaleItem[]
+  demandForecasts DemandForecast[]
+  alerts          Alert[]
+
+  @@index([sku])
+  @@index([categoryId])
+  @@index([supplierId])
+  @@index([active])
+  @@map("products")
+}
+
+model StockMovement {
+  id           String       @id @default(cuid())
+  productId    String       @map("product_id")
+  userId       Int          @map("user_id")
+  type         MovementType
+  quantity     Int
+  unitPrice    Float?       @map("unit_price")
+  reason       String?
+  notes        String?
+  movementDate DateTime     @default(now()) @map("movement_date")
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([productId, movementDate(sort: Desc)])
+  @@index([type])
+  @@index([userId])
+  @@map("stock_movements")
+}
+
+model Sale {
+  id          String     @id @default(cuid())
+  saleNumber  String     @unique @map("sale_number")
+  userId      Int        @map("user_id")
+  totalAmount Float      @default(0) @map("total_amount")
+  status      SaleStatus @default(PENDING)
+  saleDate    DateTime   @default(now()) @map("sale_date")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Restrict)
+  saleItems SaleItem[]
+
+  @@index([saleDate(sort: Desc)])
+  @@index([status])
+  @@index([userId])
+  @@map("sales")
+}
+
+model SaleItem {
+  id        String   @id @default(cuid())
+  saleId    String   @map("sale_id")
+  productId String   @map("product_id")
+  quantity  Int
+  unitPrice Float    @map("unit_price")
+  subtotal  Float
+  createdAt DateTime @default(now()) @map("created_at")
+
+  sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([productId])
+  @@index([saleId])
+  @@map("sale_items")
+}
+
+model DemandForecast {
+  id                 String   @id @default(cuid())
+  productId          String   @map("product_id")
+  daysToStockout     Int?     @map("days_to_stockout")
+  averageDailyDemand Float?   @map("average_daily_demand")
+  confidenceLevel    Float?   @map("confidence_level")
+  historicalData     String?  @map("historical_data")
+  calculationDate    DateTime @default(now()) @map("calculation_date")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([calculationDate(sort: Desc)])
+  @@map("demand_forecasts")
+}
+
+model Alert {
+  id        String        @id @default(cuid())
+  productId String?       @map("product_id")
+  userId    Int?          @map("user_id")
+  type      AlertType
+  title     String
+  message   String?
+  priority  AlertPriority @default(MEDIUM)
+  read      Boolean       @default(false)
+  alertDate DateTime      @default(now()) @map("alert_date")
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  product Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([productId])
+  @@index([type, priority])
+  @@map("alerts")
+}
+
+model SystemSetting {
+  id           String      @id @default(cuid())
+  settingKey   String      @unique @map("setting_key")
+  settingValue String      @map("setting_value")
+  description  String?
+  type         SettingType @default(STRING)
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  @@index([settingKey])
+  @@map("system_settings")
+}
