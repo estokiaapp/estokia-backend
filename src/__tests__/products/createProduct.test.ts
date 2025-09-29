@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, jest } from '@jest/globals';
-import { FastifyInstance } from 'fastify';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import { type FastifyInstance } from 'fastify';
 import { createTestApp } from '../utils/testApp.js';
 import { mockProducts } from '../utils/mockData.js';
 
-jest.mock('../../controllers/ProductController.js');
+vi.mock('../../controllers/ProductController.js');
 
 describe('Products - Create Product', () => {
   let app: FastifyInstance;
@@ -17,13 +17,13 @@ describe('Products - Create Product', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('POST /api/products', () => {
     it('should return 201 for successful product creation', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      const mockCreateProduct = mockProductController.ProductController.prototype.createProduct = jest.fn()
+      const mockCreateProduct = mockProductController.ProductController.prototype.createProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(201).send({
             id: '1',
@@ -76,7 +76,7 @@ describe('Products - Create Product', () => {
 
     it('should accept product with minimal required fields', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      const mockCreateProduct = mockProductController.ProductController.prototype.createProduct = jest.fn()
+      const mockCreateProduct = mockProductController.ProductController.prototype.createProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(201).send({
             id: '1',
@@ -100,7 +100,7 @@ describe('Products - Create Product', () => {
 
     it('should accept product with all optional fields', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      const mockCreateProduct = mockProductController.ProductController.prototype.createProduct = jest.fn()
+      const mockCreateProduct = mockProductController.ProductController.prototype.createProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(201).send({
             id: '1',
@@ -120,7 +120,7 @@ describe('Products - Create Product', () => {
 
     it('should return 409 for duplicate sku', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      mockProductController.ProductController.prototype.createProduct = jest.fn()
+      mockProductController.ProductController.prototype.createProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(409).send({
             error: 'Product with this SKU already exists'
@@ -178,7 +178,7 @@ describe('Products - Create Product', () => {
 
     it('should handle server errors during creation', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      mockProductController.ProductController.prototype.createProduct = jest.fn()
+      mockProductController.ProductController.prototype.createProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(500).send({
             error: 'Internal server error'

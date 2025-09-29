@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, jest } from '@jest/globals';
-import { FastifyInstance } from 'fastify';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import { type FastifyInstance } from 'fastify';
 import { createTestApp, generateValidJWT } from '../utils/testApp.js';
 
-jest.mock('../../controllers/UserController.js');
+vi.mock('../../controllers/UserController.js');
 
 describe('Users - Delete User', () => {
   let app: FastifyInstance;
@@ -16,7 +16,7 @@ describe('Users - Delete User', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('DELETE /api/users/:id', () => {
@@ -31,7 +31,7 @@ describe('Users - Delete User', () => {
 
     it('should return 200 for successful deletion with valid token', async () => {
       const mockUserController = await import('../../controllers/UserController.js');
-      const mockDeleteUser = mockUserController.UserController.prototype.deleteUser = jest.fn()
+      const mockDeleteUser = mockUserController.UserController.prototype.deleteUser = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send({
             message: 'User deleted successfully'
@@ -57,7 +57,7 @@ describe('Users - Delete User', () => {
 
     it('should return 404 for non-existent user', async () => {
       const mockUserController = await import('../../controllers/UserController.js');
-      mockUserController.UserController.prototype.deleteUser = jest.fn()
+      mockUserController.UserController.prototype.deleteUser = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(404).send({
             error: 'User not found'
@@ -107,7 +107,7 @@ describe('Users - Delete User', () => {
 
     it('should return 500 for server errors during deletion', async () => {
       const mockUserController = await import('../../controllers/UserController.js');
-      mockUserController.UserController.prototype.deleteUser = jest.fn()
+      mockUserController.UserController.prototype.deleteUser = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(500).send({
             error: 'Internal server error'

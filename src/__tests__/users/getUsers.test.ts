@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, jest } from '@jest/globals';
-import { FastifyInstance } from 'fastify';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import { type FastifyInstance } from 'fastify';
 import { createTestApp } from '../utils/testApp.js';
 import { mockUsers } from '../utils/mockData.js';
 
-jest.mock('../../controllers/UserController.js');
+vi.mock('../../controllers/UserController.js');
 
 describe('Users - Get Users', () => {
   let app: FastifyInstance;
@@ -17,13 +17,13 @@ describe('Users - Get Users', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('GET /api/users', () => {
     it('should return 200 with users array', async () => {
       const mockUserController = await import('../../controllers/UserController.js');
-      const mockGetAllUsers = mockUserController.UserController.prototype.getAllUsers = jest.fn()
+      const mockGetAllUsers = mockUserController.UserController.prototype.getAllUsers = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send(mockUsers.validUserArray);
         });
@@ -45,7 +45,7 @@ describe('Users - Get Users', () => {
 
     it('should return 200 with empty array when no users exist', async () => {
       const mockUserController = await import('../../controllers/UserController.js');
-      mockUserController.UserController.prototype.getAllUsers = jest.fn()
+      mockUserController.UserController.prototype.getAllUsers = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send([]);
         });
@@ -63,7 +63,7 @@ describe('Users - Get Users', () => {
 
     it('should return 500 for server errors', async () => {
       const mockUserController = await import('../../controllers/UserController.js');
-      mockUserController.UserController.prototype.getAllUsers = jest.fn()
+      mockUserController.UserController.prototype.getAllUsers = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(500).send({
             error: 'Internal server error'
@@ -82,7 +82,7 @@ describe('Users - Get Users', () => {
   describe('GET /api/users/:id', () => {
     it('should return 200 with user data for existing user', async () => {
       const mockUserController = await import('../../controllers/UserController.js');
-      const mockGetUserById = mockUserController.UserController.prototype.getUserById = jest.fn()
+      const mockGetUserById = mockUserController.UserController.prototype.getUserById = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send(mockUsers.validUser);
         });
@@ -102,7 +102,7 @@ describe('Users - Get Users', () => {
 
     it('should return 404 for non-existent user', async () => {
       const mockUserController = await import('../../controllers/UserController.js');
-      mockUserController.UserController.prototype.getUserById = jest.fn()
+      mockUserController.UserController.prototype.getUserById = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(404).send({
             error: 'User not found'

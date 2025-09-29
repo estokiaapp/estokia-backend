@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, jest } from '@jest/globals';
-import { FastifyInstance } from 'fastify';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import { type FastifyInstance } from 'fastify';
 import { createTestApp } from '../utils/testApp.js';
 
-jest.mock('../../controllers/ProductController.js');
+vi.mock('../../controllers/ProductController.js');
 
 describe('Products - Delete Product', () => {
   let app: FastifyInstance;
@@ -16,13 +16,13 @@ describe('Products - Delete Product', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('DELETE /api/products/:id', () => {
     it('should return 200 for successful product deletion', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      const mockDeleteProduct = mockProductController.ProductController.prototype.deleteProduct = jest.fn()
+      const mockDeleteProduct = mockProductController.ProductController.prototype.deleteProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send({
             message: 'Product deleted successfully'
@@ -43,7 +43,7 @@ describe('Products - Delete Product', () => {
 
     it('should return 404 for non-existent product', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      mockProductController.ProductController.prototype.deleteProduct = jest.fn()
+      mockProductController.ProductController.prototype.deleteProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(404).send({
             error: 'Product not found'
@@ -72,7 +72,7 @@ describe('Products - Delete Product', () => {
 
     it('should return 409 for products with dependencies', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      mockProductController.ProductController.prototype.deleteProduct = jest.fn()
+      mockProductController.ProductController.prototype.deleteProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(409).send({
             error: 'Cannot delete product with existing orders'
@@ -91,7 +91,7 @@ describe('Products - Delete Product', () => {
 
     it('should handle server errors during deletion', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      mockProductController.ProductController.prototype.deleteProduct = jest.fn()
+      mockProductController.ProductController.prototype.deleteProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(500).send({
             error: 'Internal server error'
@@ -108,7 +108,7 @@ describe('Products - Delete Product', () => {
 
     it('should verify controller method is called with correct parameters', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      const mockDeleteProduct = mockProductController.ProductController.prototype.deleteProduct = jest.fn()
+      const mockDeleteProduct = mockProductController.ProductController.prototype.deleteProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           expect(request.params).toHaveProperty('id');
           expect((request.params as any).id).toBe('123');
@@ -128,7 +128,7 @@ describe('Products - Delete Product', () => {
 
     it('should return consistent response format for successful deletion', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      mockProductController.ProductController.prototype.deleteProduct = jest.fn()
+      mockProductController.ProductController.prototype.deleteProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send({
             message: 'Product deleted successfully',
@@ -149,7 +149,7 @@ describe('Products - Delete Product', () => {
 
     it('should handle database connection errors', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      mockProductController.ProductController.prototype.deleteProduct = jest.fn()
+      mockProductController.ProductController.prototype.deleteProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(503).send({
             error: 'Database unavailable'

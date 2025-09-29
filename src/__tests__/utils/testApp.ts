@@ -1,9 +1,11 @@
-import Fastify, { FastifyInstance } from 'fastify';
+import Fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import { userRoutes } from '../../routes/userRoutes.js';
 import { authRoutes } from '../../routes/authRoutes.js';
 import { productRoutes } from '../../routes/productRoutes.js';
+import { salesRoutes } from '../../routes/salesRoutes.js';
+import { stockRoutes } from '../../routes/stockRoutes.js';
 import { errorHandler } from '../../middleware/errorHandler.js';
 import { authenticate } from '../../middleware/auth.js';
 
@@ -32,6 +34,8 @@ export async function createTestApp(): Promise<FastifyInstance> {
   await app.register(authRoutes, { prefix: '/api' });
   await app.register(userRoutes, { prefix: '/api' });
   await app.register(productRoutes, { prefix: '/api' });
+  await app.register(salesRoutes, { prefix: '/api' });
+  await app.register(stockRoutes, { prefix: '/api' });
 
   await app.ready();
   

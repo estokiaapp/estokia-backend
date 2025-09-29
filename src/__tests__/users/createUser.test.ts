@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, jest } from '@jest/globals';
-import { FastifyInstance } from 'fastify';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import { type FastifyInstance } from 'fastify';
 import { createTestApp } from '../utils/testApp.js';
 import { mockUsers } from '../utils/mockData.js';
 
-jest.mock('../../controllers/UserController.js');
+vi.mock('../../controllers/UserController.js');
 
 describe('Users - Create User', () => {
   let app: FastifyInstance;
@@ -17,13 +17,13 @@ describe('Users - Create User', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('POST /api/users', () => {
     it('should return 201 for successful user creation', async () => {
       const mockUserController = await import('../../controllers/UserController.js');
-      const mockCreateUser = mockUserController.UserController.prototype.createUser = jest.fn()
+      const mockCreateUser = mockUserController.UserController.prototype.createUser = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(201).send({
             id: '1',
@@ -92,7 +92,7 @@ describe('Users - Create User', () => {
 
     it('should return 409 for duplicate email', async () => {
       const mockUserController = await import('../../controllers/UserController.js');
-      mockUserController.UserController.prototype.createUser = jest.fn()
+      mockUserController.UserController.prototype.createUser = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(409).send({
             error: 'User with this email already exists'
@@ -122,7 +122,7 @@ describe('Users - Create User', () => {
 
     it('should accept optional name field', async () => {
       const mockUserController = await import('../../controllers/UserController.js');
-      const mockCreateUser = mockUserController.UserController.prototype.createUser = jest.fn()
+      const mockCreateUser = mockUserController.UserController.prototype.createUser = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(201).send({
             id: '1',

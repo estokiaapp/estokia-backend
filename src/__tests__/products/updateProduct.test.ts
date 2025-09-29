@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, jest } from '@jest/globals';
-import { FastifyInstance } from 'fastify';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import { type FastifyInstance } from 'fastify';
 import { createTestApp } from '../utils/testApp.js';
 import { mockProducts } from '../utils/mockData.js';
 
-jest.mock('../../controllers/ProductController.js');
+vi.mock('../../controllers/ProductController.js');
 
 describe('Products - Update Product', () => {
   let app: FastifyInstance;
@@ -17,13 +17,13 @@ describe('Products - Update Product', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('PUT /api/products/:id', () => {
     it('should return 200 for successful product update', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      const mockUpdateProduct = mockProductController.ProductController.prototype.updateProduct = jest.fn()
+      const mockUpdateProduct = mockProductController.ProductController.prototype.updateProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send({
             id: '1',
@@ -50,7 +50,7 @@ describe('Products - Update Product', () => {
 
     it('should return 404 for non-existent product', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      mockProductController.ProductController.prototype.updateProduct = jest.fn()
+      mockProductController.ProductController.prototype.updateProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(404).send({
             error: 'Product not found'
@@ -70,7 +70,7 @@ describe('Products - Update Product', () => {
 
     it('should allow partial updates', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      const mockUpdateProduct = mockProductController.ProductController.prototype.updateProduct = jest.fn()
+      const mockUpdateProduct = mockProductController.ProductController.prototype.updateProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send({
             id: '1',
@@ -99,7 +99,7 @@ describe('Products - Update Product', () => {
 
     it('should return 409 for duplicate sku conflict', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      mockProductController.ProductController.prototype.updateProduct = jest.fn()
+      mockProductController.ProductController.prototype.updateProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(409).send({
             error: 'SKU already exists'
@@ -143,7 +143,7 @@ describe('Products - Update Product', () => {
 
     it('should update inventory-related fields', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      const mockUpdateProduct = mockProductController.ProductController.prototype.updateProduct = jest.fn()
+      const mockUpdateProduct = mockProductController.ProductController.prototype.updateProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send({
             id: '1',
@@ -171,7 +171,7 @@ describe('Products - Update Product', () => {
 
     it('should update category and supplier references', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      const mockUpdateProduct = mockProductController.ProductController.prototype.updateProduct = jest.fn()
+      const mockUpdateProduct = mockProductController.ProductController.prototype.updateProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send({
             id: '1',
@@ -197,7 +197,7 @@ describe('Products - Update Product', () => {
 
     it('should handle server errors during update', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      mockProductController.ProductController.prototype.updateProduct = jest.fn()
+      mockProductController.ProductController.prototype.updateProduct = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(500).send({
             error: 'Internal server error'

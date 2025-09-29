@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, jest } from '@jest/globals';
-import { FastifyInstance } from 'fastify';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import { type FastifyInstance } from 'fastify';
 import { createTestApp, generateValidJWT } from '../utils/testApp.js';
 import { mockUsers } from '../utils/mockData.js';
 
-jest.mock('../../controllers/AuthController.js');
+vi.mock('../../controllers/AuthController.js');
 
 describe('Auth - Current User', () => {
   let app: FastifyInstance;
@@ -17,13 +17,13 @@ describe('Auth - Current User', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('GET /api/auth/me', () => {
     it('should return 200 and user data for valid token', async () => {
       const mockAuthController = await import('../../controllers/AuthController.js');
-      const mockGetCurrentUser = mockAuthController.AuthController.prototype.getCurrentUser = jest.fn()
+      const mockGetCurrentUser = mockAuthController.AuthController.prototype.getCurrentUser = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send(mockUsers.validUser);
         });

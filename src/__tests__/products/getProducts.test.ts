@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, jest } from '@jest/globals';
-import { FastifyInstance } from 'fastify';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import { type FastifyInstance } from 'fastify';
 import { createTestApp } from '../utils/testApp.js';
 import { mockProducts } from '../utils/mockData.js';
 
-jest.mock('../../controllers/ProductController.js');
+vi.mock('../../controllers/ProductController.js');
 
 describe('Products - Get Products', () => {
   let app: FastifyInstance;
@@ -17,13 +17,13 @@ describe('Products - Get Products', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('GET /api/products', () => {
     it('should return 200 with products array', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      const mockGetAllProducts = mockProductController.ProductController.prototype.getAllProducts = jest.fn()
+      const mockGetAllProducts = mockProductController.ProductController.prototype.getAllProducts = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send(mockProducts.validProductArray);
         });
@@ -46,7 +46,7 @@ describe('Products - Get Products', () => {
 
     it('should return 200 with filtered products by categoryId', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      const mockGetAllProducts = mockProductController.ProductController.prototype.getAllProducts = jest.fn()
+      const mockGetAllProducts = mockProductController.ProductController.prototype.getAllProducts = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send([mockProducts.validProduct]);
         });
@@ -66,7 +66,7 @@ describe('Products - Get Products', () => {
 
     it('should return 200 with filtered products by supplierId', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      mockProductController.ProductController.prototype.getAllProducts = jest.fn()
+      mockProductController.ProductController.prototype.getAllProducts = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send([mockProducts.validProduct]);
         });
@@ -81,7 +81,7 @@ describe('Products - Get Products', () => {
 
     it('should return 200 with price range filtering', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      mockProductController.ProductController.prototype.getAllProducts = jest.fn()
+      mockProductController.ProductController.prototype.getAllProducts = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send([mockProducts.validProduct]);
         });
@@ -96,7 +96,7 @@ describe('Products - Get Products', () => {
 
     it('should return 200 with stock filter', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      mockProductController.ProductController.prototype.getAllProducts = jest.fn()
+      mockProductController.ProductController.prototype.getAllProducts = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send([mockProducts.validProduct]);
         });
@@ -111,7 +111,7 @@ describe('Products - Get Products', () => {
 
     it('should return 200 with empty array when no products exist', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      mockProductController.ProductController.prototype.getAllProducts = jest.fn()
+      mockProductController.ProductController.prototype.getAllProducts = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send([]);
         });
@@ -129,7 +129,7 @@ describe('Products - Get Products', () => {
 
     it('should return 500 for server errors', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      mockProductController.ProductController.prototype.getAllProducts = jest.fn()
+      mockProductController.ProductController.prototype.getAllProducts = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(500).send({
             error: 'Internal server error'
@@ -148,7 +148,7 @@ describe('Products - Get Products', () => {
   describe('GET /api/products/:id', () => {
     it('should return 200 with product data for existing product', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      const mockGetProductById = mockProductController.ProductController.prototype.getProductById = jest.fn()
+      const mockGetProductById = mockProductController.ProductController.prototype.getProductById = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send(mockProducts.validProduct);
         });
@@ -169,7 +169,7 @@ describe('Products - Get Products', () => {
 
     it('should return 404 for non-existent product', async () => {
       const mockProductController = await import('../../controllers/ProductController.js');
-      mockProductController.ProductController.prototype.getProductById = jest.fn()
+      mockProductController.ProductController.prototype.getProductById = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(404).send({
             error: 'Product not found'

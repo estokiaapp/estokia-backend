@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, jest } from '@jest/globals';
-import { FastifyInstance } from 'fastify';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import { type FastifyInstance } from 'fastify';
 import { createTestApp, generateValidJWT } from '../utils/testApp.js';
 import { mockUsers } from '../utils/mockData.js';
 
-jest.mock('../../controllers/UserController.js');
+vi.mock('../../controllers/UserController.js');
 
 describe('Users - Update User', () => {
   let app: FastifyInstance;
@@ -17,7 +17,7 @@ describe('Users - Update User', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('PUT /api/users/:id', () => {
@@ -33,7 +33,7 @@ describe('Users - Update User', () => {
 
     it('should return 200 for successful update with valid token', async () => {
       const mockUserController = await import('../../controllers/UserController.js');
-      const mockUpdateUser = mockUserController.UserController.prototype.updateUser = jest.fn()
+      const mockUpdateUser = mockUserController.UserController.prototype.updateUser = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send({
             id: '1',
@@ -63,7 +63,7 @@ describe('Users - Update User', () => {
 
     it('should return 404 for non-existent user', async () => {
       const mockUserController = await import('../../controllers/UserController.js');
-      mockUserController.UserController.prototype.updateUser = jest.fn()
+      mockUserController.UserController.prototype.updateUser = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(404).send({
             error: 'User not found'
@@ -117,7 +117,7 @@ describe('Users - Update User', () => {
 
     it('should allow partial updates', async () => {
       const mockUserController = await import('../../controllers/UserController.js');
-      const mockUpdateUser = mockUserController.UserController.prototype.updateUser = jest.fn()
+      const mockUpdateUser = mockUserController.UserController.prototype.updateUser = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(200).send({
             id: '1',
@@ -146,7 +146,7 @@ describe('Users - Update User', () => {
 
     it('should return 409 for duplicate email conflict', async () => {
       const mockUserController = await import('../../controllers/UserController.js');
-      mockUserController.UserController.prototype.updateUser = jest.fn()
+      mockUserController.UserController.prototype.updateUser = vi.fn()
         .mockImplementation(async (request, reply) => {
           return reply.code(409).send({
             error: 'Email already exists'
