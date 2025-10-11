@@ -15,7 +15,12 @@ export class CategoryController {
 
   getCategoryById = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
     try {
-      const category = await this.categoryService.getCategoryById(request.params.id)
+      const id = parseInt(request.params.id, 10)
+      if (isNaN(id) || id < 1) {
+        return reply.status(400).send({ error: 'Invalid ID format. Must be a positive integer.' })
+      }
+
+      const category = await this.categoryService.getCategoryById(id)
 
       if (!category) {
         return reply.status(404).send({ error: 'Category not found' })
@@ -42,7 +47,12 @@ export class CategoryController {
 
   updateCategory = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
     try {
-      const category = await this.categoryService.updateCategory(request.params.id, request.body)
+      const id = parseInt(request.params.id, 10)
+      if (isNaN(id) || id < 1) {
+        return reply.status(400).send({ error: 'Invalid ID format. Must be a positive integer.' })
+      }
+
+      const category = await this.categoryService.updateCategory(id, request.body)
       reply.send(category)
     } catch (error: any) {
       if (error.message === 'Category not found') {
@@ -57,7 +67,12 @@ export class CategoryController {
 
   deleteCategory = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
     try {
-      await this.categoryService.deleteCategory(request.params.id)
+      const id = parseInt(request.params.id, 10)
+      if (isNaN(id) || id < 1) {
+        return reply.status(400).send({ error: 'Invalid ID format. Must be a positive integer.' })
+      }
+
+      await this.categoryService.deleteCategory(id)
       reply.status(204).send()
     } catch (error: any) {
       if (error.message === 'Category not found') {

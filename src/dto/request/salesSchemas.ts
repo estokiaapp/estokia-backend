@@ -12,7 +12,7 @@ export const CREATE_SALE_SCHEMA = {
           type: 'object',
           required: ['productId', 'quantity', 'unitPrice'],
           properties: {
-            productId: { type: 'string', minLength: 1 },
+            productId: { type: 'integer', minimum: 1 },
             quantity: { type: 'integer', minimum: 1 },
             unitPrice: { type: 'number', minimum: 0 }
           }
@@ -32,7 +32,7 @@ export const CREATE_SALE_SCHEMA = {
     201: {
       type: 'object',
       properties: {
-        id: { type: 'string' },
+        id: { type: 'integer' },
         saleNumber: { type: 'string' },
         userId: { type: 'integer' },
         totalAmount: { type: 'number' },
@@ -43,8 +43,8 @@ export const CREATE_SALE_SCHEMA = {
           items: {
             type: 'object',
             properties: {
-              id: { type: 'string' },
-              productId: { type: 'string' },
+              id: { type: 'integer' },
+              productId: { type: 'integer' },
               quantity: { type: 'integer' },
               unitPrice: { type: 'number' },
               subtotal: { type: 'number' }
@@ -62,7 +62,7 @@ export const UPDATE_SALE_STATUS_SCHEMA = {
   params: {
     type: 'object',
     properties: {
-      id: { type: 'string' }
+      id: { type: 'integer', minimum: 1 }
     },
     required: ['id']
   },
@@ -104,7 +104,7 @@ export const GET_SALES_SCHEMA = {
           items: {
             type: 'object',
             properties: {
-              id: { type: 'string' },
+              id: { type: 'integer' },
               saleNumber: { type: 'string' },
               userId: { type: 'integer' },
               totalAmount: { type: 'number' },
@@ -115,8 +115,8 @@ export const GET_SALES_SCHEMA = {
                 items: {
                   type: 'object',
                   properties: {
-                    id: { type: 'string' },
-                    productId: { type: 'string' },
+                    id: { type: 'integer' },
+                    productId: { type: 'integer' },
                     quantity: { type: 'integer' },
                     unitPrice: { type: 'number' },
                     subtotal: { type: 'number' }
@@ -138,7 +138,7 @@ export const GET_SALE_SCHEMA = {
   params: {
     type: 'object',
     properties: {
-      id: { type: 'string' }
+      id: { type: 'integer', minimum: 1 }
     },
     required: ['id']
   },
@@ -146,7 +146,7 @@ export const GET_SALE_SCHEMA = {
     200: {
       type: 'object',
       properties: {
-        id: { type: 'string' },
+        id: { type: 'integer' },
         saleNumber: { type: 'string' },
         userId: { type: 'integer' },
         totalAmount: { type: 'number' },
@@ -157,8 +157,8 @@ export const GET_SALE_SCHEMA = {
           items: {
             type: 'object',
             properties: {
-              id: { type: 'string' },
-              productId: { type: 'string' },
+              id: { type: 'integer' },
+              productId: { type: 'integer' },
               quantity: { type: 'integer' },
               unitPrice: { type: 'number' },
               subtotal: { type: 'number' }
@@ -184,8 +184,8 @@ export const SALES_REPORT_SCHEMA = {
         enum: ['day', 'week', 'month'],
         default: 'day'
       },
-      categoryId: { type: 'string' },
-      supplierId: { type: 'string' }
+      categoryId: { type: 'integer', minimum: 1 },
+      supplierId: { type: 'integer', minimum: 1 }
     }
   },
   response: {

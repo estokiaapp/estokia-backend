@@ -18,7 +18,7 @@ export class CategoryRepository {
     })
   }
 
-  async findById(id: string) {
+  async findById(id: number) {
     return await prisma.category.findUnique({
       where: { id },
       select: {
@@ -53,7 +53,7 @@ export class CategoryRepository {
     })
   }
 
-  async update(id: string, categoryData: any) {
+  async update(id: number, categoryData: any) {
     return await prisma.category.update({
       where: { id },
       data: categoryData,
@@ -67,7 +67,7 @@ export class CategoryRepository {
     })
   }
 
-  async delete(id: string) {
+  async delete(id: number) {
     await prisma.category.delete({
       where: { id }
     })

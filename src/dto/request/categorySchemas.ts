@@ -7,7 +7,7 @@ export const GET_ALL_CATEGORIES_SCHEMA = {
       items: {
         type: 'object',
         properties: {
-          id: { type: 'string' },
+          id: { type: 'integer' },
           name: { type: 'string' },
           description: { type: 'string' },
           createdAt: { type: 'string' },
@@ -30,7 +30,7 @@ export const GET_CATEGORY_SCHEMA = {
   params: {
     type: 'object',
     properties: {
-      id: { type: 'string' }
+      id: { type: 'integer', minimum: 1 }
     },
     required: ['id']
   }
@@ -57,7 +57,7 @@ export const UPDATE_CATEGORY_SCHEMA = {
   params: {
     type: 'object',
     properties: {
-      id: { type: 'string' }
+      id: { type: 'integer', minimum: 1 }
     },
     required: ['id']
   },
@@ -77,7 +77,7 @@ export const DELETE_CATEGORY_SCHEMA = {
   params: {
     type: 'object',
     properties: {
-      id: { type: 'string' }
+      id: { type: 'integer', minimum: 1 }
     },
     required: ['id']
   }

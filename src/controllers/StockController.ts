@@ -11,7 +11,7 @@ interface StockAdjustmentBody {
 
 interface BulkStockAdjustmentBody {
   adjustments: Array<{
-    productId: string
+    productId: number
     quantity: number
     type: 'IN' | 'OUT' | 'ADJUSTMENT'
     reason?: string
@@ -36,6 +36,13 @@ interface InventoryReportQuery {
   includeInactive?: boolean
 }
 
+interface ParsedInventoryReportQuery {
+  categoryId?: number
+  supplierId?: number
+  lowStockOnly?: boolean
+  includeInactive?: boolean
+}
+
 interface StockLimitsBody {
   minimumStock?: number
   maximumStock?: number
@@ -54,14 +61,18 @@ export class StockController {
         return reply.status(401).send({ error: 'Authentication required' })
       }
 
-      const { id } = request.params
+      const id = parseInt(request.params.id, 10)
+      if (isNaN(id) || id < 1) {
+        return reply.status(400).send({ error: 'Invalid ID format. Must be a positive integer.' })
+      }
+
       const adjustmentData = {
         userId,
         type: request.body.type,
         quantity: request.body.quantity,
-        unitPrice: request.body.unitPrice,
-        reason: request.body.reason,
-        notes: request.body.notes
+        ...(request.body.unitPrice !== undefined && { unitPrice: request.body.unitPrice }),
+        ...(request.body.reason !== undefined && { reason: request.body.reason }),
+        ...(request.body.notes !== undefined && { notes: request.body.notes })
       }
 
       const result = await this.stockService.adjustStock(id, adjustmentData)
@@ -101,12 +112,16 @@ export class StockController {
     reply: FastifyReply
   ) => {
     try {
-      const { id } = request.params
+      const id = parseInt(request.params.id, 10)
+      if (isNaN(id) || id < 1) {
+        return reply.status(400).send({ error: 'Invalid ID format. Must be a positive integer.' })
+      }
+
       const filters = {
-        startDate: request.query.startDate,
-        endDate: request.query.endDate,
-        type: request.query.type,
-        userId: request.query.userId,
+        ...(request.query.startDate !== undefined && { startDate: request.query.startDate }),
+        ...(request.query.endDate !== undefined && { endDate: request.query.endDate }),
+        ...(request.query.type !== undefined && { type: request.query.type }),
+        ...(request.query.userId !== undefined && { userId: request.query.userId }),
         limit: request.query.limit || 50,
         offset: request.query.offset || 0
       }
@@ -125,10 +140,10 @@ export class StockController {
   getAllStockMovements = async (request: FastifyRequest<{ Querystring: StockHistoryQuery }>, reply: FastifyReply) => {
     try {
       const filters = {
-        startDate: request.query.startDate,
-        endDate: request.query.endDate,
-        type: request.query.type,
-        userId: request.query.userId,
+        ...(request.query.startDate !== undefined && { startDate: request.query.startDate }),
+        ...(request.query.endDate !== undefined && { endDate: request.query.endDate }),
+        ...(request.query.type !== undefined && { type: request.query.type }),
+        ...(request.query.userId !== undefined && { userId: request.query.userId }),
         limit: request.query.limit || 50,
         offset: request.query.offset || 0
       }
@@ -142,11 +157,25 @@ export class StockController {
 
   getInventoryReport = async (request: FastifyRequest<{ Querystring: InventoryReportQuery }>, reply: FastifyReply) => {
     try {
-      const filters = {
-        categoryId: request.query.categoryId,
-        supplierId: request.query.supplierId,
+      const filters: ParsedInventoryReportQuery = {
         lowStockOnly: request.query.lowStockOnly || false,
         includeInactive: request.query.includeInactive || false
+      }
+
+      if (request.query.categoryId) {
+        const categoryId = parseInt(request.query.categoryId, 10)
+        if (isNaN(categoryId) || categoryId < 1) {
+          return reply.status(400).send({ error: 'Invalid categoryId format. Must be a positive integer.' })
+        }
+        filters.categoryId = categoryId
+      }
+
+      if (request.query.supplierId) {
+        const supplierId = parseInt(request.query.supplierId, 10)
+        if (isNaN(supplierId) || supplierId < 1) {
+          return reply.status(400).send({ error: 'Invalid supplierId format. Must be a positive integer.' })
+        }
+        filters.supplierId = supplierId
       }
 
       const report = await this.stockService.getInventoryReport(filters)
@@ -170,10 +199,14 @@ export class StockController {
     reply: FastifyReply
   ) => {
     try {
-      const { id } = request.params
+      const id = parseInt(request.params.id, 10)
+      if (isNaN(id) || id < 1) {
+        return reply.status(400).send({ error: 'Invalid ID format. Must be a positive integer.' })
+      }
+
       const limits = {
-        minimumStock: request.body.minimumStock,
-        maximumStock: request.body.maximumStock
+        ...(request.body.minimumStock !== undefined && { minimumStock: request.body.minimumStock }),
+        ...(request.body.maximumStock !== undefined && { maximumStock: request.body.maximumStock })
       }
 
       const product = await this.stockService.updateStockLimits(id, limits)
@@ -199,9 +232,22 @@ export class StockController {
     reply: FastifyReply
   ) => {
     try {
-      const filters = {
-        categoryId: request.query.categoryId,
-        supplierId: request.query.supplierId
+      const filters: { categoryId?: number; supplierId?: number } = {}
+
+      if (request.query.categoryId) {
+        const categoryId = parseInt(request.query.categoryId, 10)
+        if (isNaN(categoryId) || categoryId < 1) {
+          return reply.status(400).send({ error: 'Invalid categoryId format. Must be a positive integer.' })
+        }
+        filters.categoryId = categoryId
+      }
+
+      if (request.query.supplierId) {
+        const supplierId = parseInt(request.query.supplierId, 10)
+        if (isNaN(supplierId) || supplierId < 1) {
+          return reply.status(400).send({ error: 'Invalid supplierId format. Must be a positive integer.' })
+        }
+        filters.supplierId = supplierId
       }
 
       const report = await this.stockService.getStockValueReport(filters)
@@ -219,7 +265,11 @@ export class StockController {
     reply: FastifyReply
   ) => {
     try {
-      const { id } = request.params
+      const id = parseInt(request.params.id, 10)
+      if (isNaN(id) || id < 1) {
+        return reply.status(400).send({ error: 'Invalid ID format. Must be a positive integer.' })
+      }
+
       const days = request.query.days || 30
 
       const trends = await this.stockService.getStockTrends(id, days)

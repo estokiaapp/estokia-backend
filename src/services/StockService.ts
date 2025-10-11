@@ -1,8 +1,9 @@
 import { StockMovementRepository } from '../repositories/StockMovementRepository.js'
 import { ProductRepository } from '../repositories/ProductRepository.js'
+import LogService from './LogService.js'
 
 interface StockAdjustmentData {
-  productId: string
+  productId: number
   userId: number
   type: 'IN' | 'OUT' | 'ADJUSTMENT'
   quantity: number
@@ -25,8 +26,8 @@ interface StockHistoryFilters {
 }
 
 interface InventoryReportFilters {
-  categoryId?: string
-  supplierId?: string
+  categoryId?: number
+  supplierId?: number
   lowStockOnly?: boolean
   includeInactive?: boolean
 }
@@ -34,36 +35,57 @@ interface InventoryReportFilters {
 export class StockService {
   private stockMovementRepository = new StockMovementRepository()
   private productRepository = new ProductRepository()
+  private logService = new LogService()
 
-  async adjustStock(productId: string, adjustmentData: Omit<StockAdjustmentData, 'productId'>) {
-    const product = await this.productRepository.findById(productId)
-    if (!product) {
-      throw new Error('Product not found')
-    }
+  async adjustStock(productId: number, adjustmentData: Omit<StockAdjustmentData, 'productId'>, userName?: string) {
+    try {
+      const product = await this.productRepository.findById(productId)
+      if (!product) {
+        throw new Error('Product not found')
+      }
 
-    if (!product.active) {
-      throw new Error('Cannot adjust stock for inactive product')
-    }
+      if (!product.active) {
+        throw new Error('Cannot adjust stock for inactive product')
+      }
 
-    if (adjustmentData.quantity === 0) {
-      throw new Error('Quantity cannot be zero')
-    }
+      if (adjustmentData.quantity === 0) {
+        throw new Error('Quantity cannot be zero')
+      }
 
-    if (adjustmentData.type === 'OUT' && product.currentStock < Math.abs(adjustmentData.quantity)) {
-      throw new Error(`Insufficient stock. Available: ${product.currentStock}, Requested: ${Math.abs(adjustmentData.quantity)}`)
-    }
+      if (adjustmentData.type === 'OUT' && product.currentStock < Math.abs(adjustmentData.quantity)) {
+        throw new Error(`Insufficient stock. Available: ${product.currentStock}, Requested: ${Math.abs(adjustmentData.quantity)}`)
+      }
 
-    const result = await this.stockMovementRepository.create({
-      productId,
-      ...adjustmentData
-    })
+      const result = await this.stockMovementRepository.create({
+        productId,
+        ...adjustmentData
+      })
 
-    await this.checkLowStockAlert(productId)
+      // Log stock movement
+      await this.logService.logStockMovement({
+        id: result.movement.id,
+        product_id: productId,
+        quantity: adjustmentData.quantity,
+        movement_type: adjustmentData.type,
+        reason: adjustmentData.reason,
+        reference_type: 'MANUAL',
+      }, adjustmentData.userId, userName)
 
-    return {
-      id: product.id,
-      currentStock: result.product.currentStock,
-      movement: result.movement
+      await this.checkLowStockAlert(productId)
+
+      return {
+        id: product.id,
+        currentStock: result.product.currentStock,
+        movement: result.movement
+      }
+    } catch (error) {
+      await this.logService.logError(error as Error, {
+        operation: 'adjustStock',
+        eventType: 'DATABASE_ERROR',
+        productId,
+        userId: adjustmentData.userId,
+      })
+      throw error
     }
   }
 
@@ -79,7 +101,7 @@ export class StockService {
     return results
   }
 
-  async getStockHistory(productId: string, filters?: StockHistoryFilters) {
+  async getStockHistory(productId: number, filters?: StockHistoryFilters) {
     return await this.stockMovementRepository.findByProductId(productId, filters)
   }
 
@@ -99,7 +121,7 @@ export class StockService {
     return await this.stockMovementRepository.getStockMovementsByDateRange(startDate, endDate)
   }
 
-  async updateStockLimits(productId: string, limits: {
+  async updateStockLimits(productId: number, limits: {
     minimumStock?: number
     maximumStock?: number
   }) {
@@ -129,8 +151,8 @@ export class StockService {
   }
 
   async getStockValueReport(filters?: {
-    categoryId?: string
-    supplierId?: string
+    categoryId?: number
+    supplierId?: number
   }) {
     const inventoryData = await this.stockMovementRepository.getInventoryReport({
       ...(filters?.categoryId && { categoryId: filters.categoryId }),
@@ -175,12 +197,29 @@ export class StockService {
     }
   }
 
-  private async checkLowStockAlert(productId: string) {
+  private async checkLowStockAlert(productId: number) {
     const product = await this.productRepository.findById(productId)
     if (!product) return
 
     if (product.currentStock <= product.minimumStock) {
       await this.createLowStockAlert(product)
+
+      // Log low stock alert
+      await this.logService.log({
+        timestamp: new Date(),
+        eventType: 'LOW_STOCK_ALERT',
+        action: 'ALERT',
+        resourceType: 'PRODUCT',
+        resourceId: productId,
+        description: `Low stock alert for product ${product.name}`,
+        metadata: {
+          productName: product.name,
+          sku: product.sku,
+          currentStock: product.currentStock,
+          minimumStock: product.minimumStock,
+        },
+        severity: product.currentStock === 0 ? 'CRITICAL' : 'WARNING',
+      })
     }
   }
 
@@ -211,17 +250,25 @@ export class StockService {
     await prisma.$disconnect()
   }
 
-  async getStockTrends(productId: string, days: number = 30) {
+  async getStockTrends(productId: number, days: number = 30) {
     const endDate = new Date()
     const startDate = new Date()
     startDate.setDate(endDate.getDate() - days)
 
-    const movements = await this.stockMovementRepository.findMany({
+    const filters: any = {
       productId,
-      ...(startDate && { startDate: startDate.toISOString().split('T')[0] }),
-      ...(endDate && { endDate: endDate.toISOString().split('T')[0] }),
       limit: 1000
-    })
+    }
+
+    if (startDate) {
+      filters.startDate = startDate.toISOString().split('T')[0]
+    }
+
+    if (endDate) {
+      filters.endDate = endDate.toISOString().split('T')[0]
+    }
+
+    const movements = await this.stockMovementRepository.findMany(filters)
 
     const dailyData = new Map<string, {
       date: string

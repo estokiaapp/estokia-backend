@@ -18,9 +18,17 @@ interface SalesReportQuery {
   supplierId?: string
 }
 
+interface ParsedSalesReportQuery {
+  startDate: string
+  endDate: string
+  groupBy?: 'day' | 'week' | 'month'
+  categoryId?: number
+  supplierId?: number
+}
+
 interface CreateSaleBody {
   saleItems: Array<{
-    productId: string
+    productId: number
     quantity: number
     unitPrice: number
   }>
@@ -58,7 +66,12 @@ export class SalesController {
 
   getSaleById = async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
     try {
-      const sale = await this.salesService.getSaleById(request.params.id)
+      const id = parseInt(request.params.id, 10)
+      if (isNaN(id) || id < 1) {
+        return reply.status(400).send({ error: 'Invalid ID format. Must be a positive integer.' })
+      }
+
+      const sale = await this.salesService.getSaleById(id)
       reply.send(sale)
     } catch (error: any) {
       if (error.message === 'Sale not found') {
@@ -79,7 +92,7 @@ export class SalesController {
       const saleData = {
         userId,
         saleItems: request.body.saleItems,
-        customerInfo: request.body.customerInfo
+        ...(request.body.customerInfo !== undefined && { customerInfo: request.body.customerInfo })
       }
 
       const sale = await this.salesService.createSale(saleData)
@@ -98,7 +111,11 @@ export class SalesController {
     reply: FastifyReply
   ) => {
     try {
-      const { id } = request.params
+      const id = parseInt(request.params.id, 10)
+      if (isNaN(id) || id < 1) {
+        return reply.status(400).send({ error: 'Invalid ID format. Must be a positive integer.' })
+      }
+
       const { status } = request.body
 
       const sale = await this.salesService.updateSaleStatus(id, status)
@@ -116,12 +133,26 @@ export class SalesController {
 
   getSalesReport = async (request: FastifyRequest<{ Querystring: SalesReportQuery }>, reply: FastifyReply) => {
     try {
-      const filters = {
+      const filters: ParsedSalesReportQuery = {
         startDate: request.query.startDate,
         endDate: request.query.endDate,
-        groupBy: request.query.groupBy || 'day',
-        categoryId: request.query.categoryId,
-        supplierId: request.query.supplierId
+        groupBy: request.query.groupBy || 'day'
+      }
+
+      if (request.query.categoryId) {
+        const categoryId = parseInt(request.query.categoryId, 10)
+        if (isNaN(categoryId) || categoryId < 1) {
+          return reply.status(400).send({ error: 'Invalid categoryId format. Must be a positive integer.' })
+        }
+        filters.categoryId = categoryId
+      }
+
+      if (request.query.supplierId) {
+        const supplierId = parseInt(request.query.supplierId, 10)
+        if (isNaN(supplierId) || supplierId < 1) {
+          return reply.status(400).send({ error: 'Invalid supplierId format. Must be a positive integer.' })
+        }
+        filters.supplierId = supplierId
       }
 
       const report = await this.salesService.getSalesReport(filters)
@@ -143,8 +174,8 @@ export class SalesController {
   ) => {
     try {
       const filters = {
-        startDate: request.query.startDate,
-        endDate: request.query.endDate,
+        ...(request.query.startDate !== undefined && { startDate: request.query.startDate }),
+        ...(request.query.endDate !== undefined && { endDate: request.query.endDate }),
         limit: request.query.limit || 10
       }
 

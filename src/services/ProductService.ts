@@ -1,8 +1,9 @@
 import { ProductRepository } from '../repositories/ProductRepository.js'
+import LogService from './LogService.js'
 
 interface ProductFilters {
-  categoryId?: string
-  supplierId?: string
+  categoryId?: number
+  supplierId?: number
   minPrice?: number
   maxPrice?: number
   inStock?: boolean
@@ -10,58 +11,147 @@ interface ProductFilters {
 
 export class ProductService {
   private productRepository = new ProductRepository()
+  private logService = new LogService()
 
   async getAllProducts(filters?: ProductFilters) {
     return await this.productRepository.findMany(filters)
   }
 
-  async getProductById(id: string) {
+  async getProductById(id: number) {
     if (!id) throw new Error('Product ID is required')
     return await this.productRepository.findById(id)
   }
 
-  async createProduct(productData: any) {
-    if (!productData.name || !productData.sku) {
-      throw new Error('Name and SKU are required')
-    }
+  async createProduct(productData: any, userId?: number, userName?: string) {
+    try {
+      if (!productData.name || !productData.sku) {
+        throw new Error('Name and SKU are required')
+      }
 
-    const existingProduct = await this.productRepository.findBySku(productData.sku)
-    if (existingProduct) {
-      throw new Error('Product with this SKU already exists')
-    }
-
-    this.validateProductData(productData)
-    return await this.productRepository.create(productData)
-  }
-
-  async updateProduct(id: string, productData: any) {
-    if (!id) throw new Error('Product ID is required')
-
-    const existingProduct = await this.productRepository.findById(id)
-    if (!existingProduct) {
-      throw new Error('Product not found')
-    }
-
-    if (productData.sku && productData.sku !== existingProduct.sku) {
-      const productWithSku = await this.productRepository.findBySku(productData.sku)
-      if (productWithSku) {
+      const existingProduct = await this.productRepository.findBySku(productData.sku)
+      if (existingProduct) {
         throw new Error('Product with this SKU already exists')
       }
-    }
 
-    this.validateProductData(productData)
-    return await this.productRepository.update(id, productData)
+      this.validateProductData(productData)
+      const product = await this.productRepository.create(productData)
+
+      // Log successful creation
+      await this.logService.log({
+        timestamp: new Date(),
+        eventType: 'PRODUCT_CREATED',
+        action: 'CREATE',
+        userId,
+        userName,
+        resourceType: 'PRODUCT',
+        resourceId: product.id,
+        description: `Product "${product.name}" created`,
+        metadata: {
+          sku: product.sku,
+          categoryId: product.categoryId,
+          supplierId: product.supplierId,
+          sellingPrice: product.sellingPrice,
+        },
+        severity: 'INFO',
+      })
+
+      return product
+    } catch (error) {
+      // Log error
+      await this.logService.logError(error as Error, {
+        operation: 'createProduct',
+        eventType: 'DATABASE_ERROR',
+        data: productData,
+        userId,
+      })
+      throw error
+    }
   }
 
-  async deleteProduct(id: string) {
-    if (!id) throw new Error('Product ID is required')
+  async updateProduct(id: number, productData: any, userId?: number, userName?: string) {
+    try {
+      if (!id) throw new Error('Product ID is required')
 
-    const existingProduct = await this.productRepository.findById(id)
-    if (!existingProduct) {
-      throw new Error('Product not found')
+      const existingProduct = await this.productRepository.findById(id)
+      if (!existingProduct) {
+        throw new Error('Product not found')
+      }
+
+      if (productData.sku && productData.sku !== existingProduct.sku) {
+        const productWithSku = await this.productRepository.findBySku(productData.sku)
+        if (productWithSku) {
+          throw new Error('Product with this SKU already exists')
+        }
+      }
+
+      this.validateProductData(productData)
+      const updatedProduct = await this.productRepository.update(id, productData)
+
+      // Log update with before/after
+      await this.logService.log({
+        timestamp: new Date(),
+        eventType: 'PRODUCT_UPDATED',
+        action: 'UPDATE',
+        userId,
+        userName,
+        resourceType: 'PRODUCT',
+        resourceId: id,
+        description: `Product "${updatedProduct.name}" updated`,
+        changes: {
+          before: existingProduct,
+          after: updatedProduct,
+        },
+        severity: 'INFO',
+      })
+
+      return updatedProduct
+    } catch (error) {
+      await this.logService.logError(error as Error, {
+        operation: 'updateProduct',
+        eventType: 'DATABASE_ERROR',
+        productId: id,
+        userId,
+      })
+      throw error
     }
+  }
 
-    await this.productRepository.delete(id)
+  async deleteProduct(id: number, userId?: number, userName?: string) {
+    try {
+      if (!id) throw new Error('Product ID is required')
+
+      const existingProduct = await this.productRepository.findById(id)
+      if (!existingProduct) {
+        throw new Error('Product not found')
+      }
+
+      await this.productRepository.delete(id)
+
+      // Log deletion
+      await this.logService.log({
+        timestamp: new Date(),
+        eventType: 'PRODUCT_DELETED',
+        action: 'DELETE',
+        userId,
+        userName,
+        resourceType: 'PRODUCT',
+        resourceId: id,
+        description: `Product "${existingProduct.name}" deleted`,
+        metadata: {
+          sku: existingProduct.sku,
+          name: existingProduct.name,
+        },
+        severity: 'INFO',
+      })
+    } catch (error) {
+      await this.logService.logError(error as Error, {
+        operation: 'deleteProduct',
+        eventType: 'DATABASE_ERROR',
+        productId: id,
+        userId,
+      })
+      throw error
+    }
   }
 
   private validateProductData(data: any) {

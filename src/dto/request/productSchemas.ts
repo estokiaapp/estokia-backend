@@ -7,8 +7,8 @@ export const CREATE_PRODUCT_SCHEMA = {
     properties: {
       name: { type: 'string' },
       sku: { type: 'string' },
-      categoryId: { type: 'string' },
-      supplierId: { type: 'string' },
+      categoryId: { type: 'integer', minimum: 1 },
+      supplierId: { type: 'integer', minimum: 1 },
       costPrice: { type: 'number', minimum: 0 },
       sellingPrice: { type: 'number', minimum: 0 },
       currentStock: { type: 'number', minimum: 0 },
@@ -22,11 +22,11 @@ export const CREATE_PRODUCT_SCHEMA = {
     201: {
       type: 'object',
       properties: {
-        id: { type: 'string' },
+        id: { type: 'integer' },
         name: { type: 'string' },
         sku: { type: 'string' },
-        categoryId: { type: 'string' },
-        supplierId: { type: 'string' },
+        categoryId: { type: 'integer' },
+        supplierId: { type: 'integer' },
         costPrice: { type: 'number' },
         sellingPrice: { type: 'number' },
         currentStock: { type: 'number' },
@@ -47,7 +47,7 @@ export const UPDATE_PRODUCT_SCHEMA = {
   params: {
     type: 'object',
     properties: {
-      id: { type: 'string' }
+      id: { type: 'integer', minimum: 1 }
     },
     required: ['id']
   },
@@ -56,8 +56,8 @@ export const UPDATE_PRODUCT_SCHEMA = {
     properties: {
       name: { type: 'string' },
       sku: { type: 'string' },
-      categoryId: { type: 'string' },
-      supplierId: { type: 'string' },
+      categoryId: { type: 'integer', minimum: 1 },
+      supplierId: { type: 'integer', minimum: 1 },
       costPrice: { type: 'number', minimum: 0 },
       sellingPrice: { type: 'number', minimum: 0 },
       currentStock: { type: 'number', minimum: 0 },
@@ -71,11 +71,11 @@ export const UPDATE_PRODUCT_SCHEMA = {
     200: {
       type: 'object',
       properties: {
-        id: { type: 'string' },
+        id: { type: 'integer' },
         name: { type: 'string' },
         sku: { type: 'string' },
-        categoryId: { type: 'string' },
-        supplierId: { type: 'string' },
+        categoryId: { type: 'integer' },
+        supplierId: { type: 'integer' },
         costPrice: { type: 'number' },
         sellingPrice: { type: 'number' },
         currentStock: { type: 'number' },
@@ -96,8 +96,8 @@ export const GET_PRODUCTS_SCHEMA = {
   querystring: {
     type: 'object',
     properties: {
-      categoryId: { type: 'string' },
-      supplierId: { type: 'string' },
+      categoryId: { type: 'integer', minimum: 1 },
+      supplierId: { type: 'integer', minimum: 1 },
       minPrice: { type: 'number', minimum: 0 },
       maxPrice: { type: 'number', minimum: 0 },
       inStock: { type: 'boolean' }
@@ -109,11 +109,11 @@ export const GET_PRODUCTS_SCHEMA = {
       items: {
         type: 'object',
         properties: {
-          id: { type: 'string' },
+          id: { type: 'integer' },
           name: { type: 'string' },
           sku: { type: 'string' },
-          categoryId: { type: 'string' },
-          supplierId: { type: 'string' },
+          categoryId: { type: 'integer' },
+          supplierId: { type: 'integer' },
           costPrice: { type: 'number' },
           sellingPrice: { type: 'number' },
           currentStock: { type: 'number' },
@@ -135,7 +135,7 @@ export const GET_PRODUCT_SCHEMA = {
   params: {
     type: 'object',
     properties: {
-      id: { type: 'string' }
+      id: { type: 'integer', minimum: 1 }
     },
     required: ['id']
   },
@@ -143,11 +143,11 @@ export const GET_PRODUCT_SCHEMA = {
     200: {
       type: 'object',
       properties: {
-        id: { type: 'string' },
+        id: { type: 'integer' },
         name: { type: 'string' },
         sku: { type: 'string' },
-        categoryId: { type: 'string' },
-        supplierId: { type: 'string' },
+        categoryId: { type: 'integer' },
+        supplierId: { type: 'integer' },
         costPrice: { type: 'number' },
         sellingPrice: { type: 'number' },
         currentStock: { type: 'number' },
@@ -168,7 +168,7 @@ export const DELETE_PRODUCT_SCHEMA = {
   params: {
     type: 'object',
     properties: {
-      id: { type: 'string' }
+      id: { type: 'integer', minimum: 1 }
     },
     required: ['id']
   },

@@ -4,7 +4,7 @@ export const STOCK_ADJUSTMENT_SCHEMA = {
   params: {
     type: 'object',
     properties: {
-      id: { type: 'string' }
+      id: { type: 'integer', minimum: 1 }
     },
     required: ['id']
   },
@@ -26,12 +26,12 @@ export const STOCK_ADJUSTMENT_SCHEMA = {
     200: {
       type: 'object',
       properties: {
-        id: { type: 'string' },
+        id: { type: 'integer' },
         currentStock: { type: 'integer' },
         movement: {
           type: 'object',
           properties: {
-            id: { type: 'string' },
+            id: { type: 'integer' },
             quantity: { type: 'integer' },
             type: { type: 'string' },
             reason: { type: 'string' },
@@ -57,7 +57,7 @@ export const BULK_STOCK_ADJUSTMENT_SCHEMA = {
           type: 'object',
           required: ['productId', 'quantity', 'type'],
           properties: {
-            productId: { type: 'string', minLength: 1 },
+            productId: { type: 'integer', minimum: 1 },
             quantity: { type: 'integer' },
             type: {
               type: 'string',
@@ -82,7 +82,7 @@ export const BULK_STOCK_ADJUSTMENT_SCHEMA = {
           items: {
             type: 'object',
             properties: {
-              productId: { type: 'string' },
+              productId: { type: 'integer' },
               success: { type: 'boolean' },
               currentStock: { type: 'integer' },
               error: { type: 'string' }
@@ -100,7 +100,7 @@ export const GET_STOCK_HISTORY_SCHEMA = {
   params: {
     type: 'object',
     properties: {
-      id: { type: 'string' }
+      id: { type: 'integer', minimum: 1 }
     },
     required: ['id']
   },
@@ -125,7 +125,7 @@ export const GET_STOCK_HISTORY_SCHEMA = {
         product: {
           type: 'object',
           properties: {
-            id: { type: 'string' },
+            id: { type: 'integer' },
             name: { type: 'string' },
             sku: { type: 'string' },
             currentStock: { type: 'integer' }
@@ -136,7 +136,7 @@ export const GET_STOCK_HISTORY_SCHEMA = {
           items: {
             type: 'object',
             properties: {
-              id: { type: 'string' },
+              id: { type: 'integer' },
               type: { type: 'string' },
               quantity: { type: 'integer' },
               unitPrice: { type: 'number' },
@@ -165,8 +165,8 @@ export const INVENTORY_REPORT_SCHEMA = {
   querystring: {
     type: 'object',
     properties: {
-      categoryId: { type: 'string' },
-      supplierId: { type: 'string' },
+      categoryId: { type: 'integer', minimum: 1 },
+      supplierId: { type: 'integer', minimum: 1 },
       lowStockOnly: { type: 'boolean', default: false },
       includeInactive: { type: 'boolean', default: false }
     }
@@ -189,7 +189,7 @@ export const INVENTORY_REPORT_SCHEMA = {
           items: {
             type: 'object',
             properties: {
-              id: { type: 'string' },
+              id: { type: 'integer' },
               name: { type: 'string' },
               sku: { type: 'string' },
               currentStock: { type: 'integer' },
@@ -201,14 +201,14 @@ export const INVENTORY_REPORT_SCHEMA = {
               category: {
                 type: 'object',
                 properties: {
-                  id: { type: 'string' },
+                  id: { type: 'integer' },
                   name: { type: 'string' }
                 }
               },
               supplier: {
                 type: 'object',
                 properties: {
-                  id: { type: 'string' },
+                  id: { type: 'integer' },
                   name: { type: 'string' }
                 }
               },

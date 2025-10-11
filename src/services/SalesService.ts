@@ -1,9 +1,10 @@
 import { SalesRepository } from '../repositories/SalesRepository.js'
 import { StockMovementRepository } from '../repositories/StockMovementRepository.js'
 import { ProductRepository } from '../repositories/ProductRepository.js'
+import LogService from './LogService.js'
 
 interface SaleItemData {
-  productId: string
+  productId: number
   quantity: number
   unitPrice: number
 }
@@ -31,20 +32,21 @@ interface SalesReportFilters {
   startDate: string
   endDate: string
   groupBy?: 'day' | 'week' | 'month'
-  categoryId?: string
-  supplierId?: string
+  categoryId?: number
+  supplierId?: number
 }
 
 export class SalesService {
   private salesRepository = new SalesRepository()
   private stockMovementRepository = new StockMovementRepository()
   private productRepository = new ProductRepository()
+  private logService = new LogService()
 
   async getAllSales(filters?: SalesFilters) {
     return await this.salesRepository.findMany(filters)
   }
 
-  async getSaleById(id: string) {
+  async getSaleById(id: number) {
     const sale = await this.salesRepository.findById(id)
     if (!sale) {
       throw new Error('Sale not found')
@@ -52,31 +54,86 @@ export class SalesService {
     return sale
   }
 
-  async createSale(saleData: CreateSaleData) {
-    await this.validateSaleItems(saleData.saleItems)
+  async createSale(saleData: CreateSaleData, userName?: string) {
+    try {
+      await this.validateSaleItems(saleData.saleItems)
 
-    const sale = await this.salesRepository.create(saleData)
+      const sale = await this.salesRepository.create(saleData)
 
-    return sale
+      // Log sale creation
+      await this.logService.logSale('CREATE', {
+        saleId: sale.id,
+        saleNumber: sale.saleNumber,
+        totalAmount: sale.totalAmount,
+        status: sale.status,
+        items: saleData.saleItems,
+      }, saleData.userId, userName)
+
+      return sale
+    } catch (error) {
+      await this.logService.logError(error as Error, {
+        operation: 'createSale',
+        eventType: 'DATABASE_ERROR',
+        userId: saleData.userId,
+      })
+      throw error
+    }
   }
 
-  async updateSaleStatus(id: string, status: 'PENDING' | 'COMPLETED' | 'CANCELLED') {
-    const existingSale = await this.salesRepository.findById(id)
-    if (!existingSale) {
-      throw new Error('Sale not found')
-    }
+  async updateSaleStatus(id: number, status: 'PENDING' | 'COMPLETED' | 'CANCELLED', userId?: number, userName?: string) {
+    try {
+      const existingSale = await this.salesRepository.findById(id)
+      if (!existingSale) {
+        throw new Error('Sale not found')
+      }
 
-    if (existingSale.status === status) {
-      throw new Error(`Sale is already ${status}`)
-    }
+      if (existingSale.status === status) {
+        throw new Error(`Sale is already ${status}`)
+      }
 
-    if (status === 'COMPLETED' && existingSale.status === 'PENDING') {
-      await this.processSaleCompletion(existingSale)
-    } else if (status === 'CANCELLED' && existingSale.status === 'COMPLETED') {
-      await this.processSaleCancellation(existingSale)
-    }
+      if (status === 'COMPLETED' && existingSale.status === 'PENDING') {
+        await this.processSaleCompletion(existingSale)
+      } else if (status === 'CANCELLED' && existingSale.status === 'COMPLETED') {
+        await this.processSaleCancellation(existingSale)
+      }
 
-    return await this.salesRepository.updateStatus(id, status)
+      const updatedSale = await this.salesRepository.updateStatus(id, status)
+
+      // Log status change
+      const eventTypeMap: Record<string, any> = {
+        COMPLETED: 'SALE_COMPLETED',
+        CANCELLED: 'SALE_CANCELLED',
+        PENDING: 'SALE_UPDATED',
+      }
+
+      await this.logService.log({
+        timestamp: new Date(),
+        eventType: eventTypeMap[status] || 'SALE_UPDATED',
+        action: status === 'COMPLETED' ? 'COMPLETE' : status === 'CANCELLED' ? 'CANCEL' : 'UPDATE',
+        userId,
+        userName,
+        resourceType: 'SALE',
+        resourceId: id,
+        description: `Sale ${existingSale.saleNumber} ${status.toLowerCase()}`,
+        metadata: {
+          saleNumber: existingSale.saleNumber,
+          totalAmount: existingSale.totalAmount,
+          previousStatus: existingSale.status,
+          newStatus: status,
+        },
+        severity: 'INFO',
+      })
+
+      return updatedSale
+    } catch (error) {
+      await this.logService.logError(error as Error, {
+        operation: 'updateSaleStatus',
+        eventType: 'DATABASE_ERROR',
+        saleId: id,
+        userId,
+      })
+      throw error
+    }
   }
 
   async getSalesReport(filters: SalesReportFilters) {

@@ -3,8 +3,8 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 interface ProductFilters {
-  categoryId?: string
-  supplierId?: string
+  categoryId?: number
+  supplierId?: number
   minPrice?: number
   maxPrice?: number
   inStock?: boolean
@@ -13,7 +13,7 @@ interface ProductFilters {
 export class ProductRepository {
   async findMany(filters?: ProductFilters) {
     const where: any = {}
-    
+
     if (filters?.categoryId) where.categoryId = filters.categoryId
     if (filters?.supplierId) where.supplierId = filters.supplierId
     if (filters?.minPrice) where.sellingPrice = { gte: filters.minPrice }
@@ -23,7 +23,7 @@ export class ProductRepository {
     return await prisma.product.findMany({ where })
   }
 
-  async findById(id: string) {
+  async findById(id: number) {
     return await prisma.product.findUnique({
       where: { id }
     })
@@ -41,14 +41,14 @@ export class ProductRepository {
     })
   }
 
-  async update(id: string, productData: any) {
+  async update(id: number, productData: any) {
     return await prisma.product.update({
       where: { id },
       data: productData
     })
   }
 
-  async delete(id: string) {
+  async delete(id: number) {
     await prisma.product.delete({
       where: { id }
     })

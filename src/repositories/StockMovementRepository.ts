@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 interface StockMovementFilters {
-  productId?: string
+  productId?: number
   startDate?: string
   endDate?: string
   type?: 'IN' | 'OUT' | 'ADJUSTMENT'
@@ -13,7 +13,7 @@ interface StockMovementFilters {
 }
 
 interface CreateStockMovementData {
-  productId: string
+  productId: number
   userId: number
   type: 'IN' | 'OUT' | 'ADJUSTMENT'
   quantity: number
@@ -23,8 +23,8 @@ interface CreateStockMovementData {
 }
 
 interface InventoryReportFilters {
-  categoryId?: string
-  supplierId?: string
+  categoryId?: number
+  supplierId?: number
   lowStockOnly?: boolean
   includeInactive?: boolean
 }
@@ -72,7 +72,7 @@ export class StockMovementRepository {
     return { movements, total }
   }
 
-  async findByProductId(productId: string, filters?: Omit<StockMovementFilters, 'productId'>) {
+  async findByProductId(productId: number, filters?: Omit<StockMovementFilters, 'productId'>) {
     const product = await prisma.product.findUnique({
       where: { id: productId },
       select: {
@@ -123,9 +123,9 @@ export class StockMovementRepository {
           userId: movementData.userId,
           type: movementData.type,
           quantity: Math.abs(movementData.quantity),
-          unitPrice: movementData.unitPrice,
-          reason: movementData.reason,
-          notes: movementData.notes
+          ...(movementData.unitPrice !== undefined && { unitPrice: movementData.unitPrice }),
+          ...(movementData.reason !== undefined && { reason: movementData.reason }),
+          ...(movementData.notes !== undefined && { notes: movementData.notes })
         },
         include: {
           product: {
@@ -158,7 +158,7 @@ export class StockMovementRepository {
 
   async createBulk(movements: CreateStockMovementData[]) {
     const results: Array<{
-      productId: string
+      productId: number
       success: boolean
       currentStock?: number
       error?: string

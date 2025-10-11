@@ -67,7 +67,7 @@ model User {
 }
 
 model Category {
-  id          String   @id @default(cuid())
+  id          Int      @id @default(autoincrement())
   name        String   @unique
   description String?
   createdAt   DateTime @default(now()) @map("created_at")
@@ -79,7 +79,7 @@ model Category {
 }
 
 model Supplier {
-  id        String   @id @default(cuid())
+  id        Int      @id @default(autoincrement())
   name      String
   taxId     String?  @unique @map("tax_id")
   email     String?
@@ -95,11 +95,11 @@ model Supplier {
 }
 
 model Product {
-  id            String   @id @default(cuid())
+  id            Int      @id @default(autoincrement())
   name          String
   sku           String   @unique
-  categoryId    String?  @map("category_id")
-  supplierId    String?  @map("supplier_id")
+  categoryId    Int?     @map("category_id")
+  supplierId    Int?     @map("supplier_id")
   costPrice     Float?   @map("cost_price")
   sellingPrice  Float?   @map("selling_price")
   currentStock  Int      @default(0) @map("current_stock")
@@ -126,8 +126,8 @@ model Product {
 }
 
 model StockMovement {
-  id           String       @id @default(cuid())
-  productId    String       @map("product_id")
+  id           Int          @id @default(autoincrement())
+  productId    Int          @map("product_id")
   userId       Int          @map("user_id")
   type         MovementType
   quantity     Int
@@ -147,7 +147,7 @@ model StockMovement {
 }
 
 model Sale {
-  id          String     @id @default(cuid())
+  id          Int        @id @default(autoincrement())
   saleNumber  String     @unique @map("sale_number")
   userId      Int        @map("user_id")
   totalAmount Float      @default(0) @map("total_amount")
@@ -166,9 +166,9 @@ model Sale {
 }
 
 model SaleItem {
-  id        String   @id @default(cuid())
-  saleId    String   @map("sale_id")
-  productId String   @map("product_id")
+  id        Int      @id @default(autoincrement())
+  saleId    Int      @map("sale_id")
+  productId Int      @map("product_id")
   quantity  Int
   unitPrice Float    @map("unit_price")
   subtotal  Float
@@ -183,8 +183,8 @@ model SaleItem {
 }
 
 model DemandForecast {
-  id                 String   @id @default(cuid())
-  productId          String   @map("product_id")
+  id                 Int      @id @default(autoincrement())
+  productId          Int      @map("product_id")
   daysToStockout     Int?     @map("days_to_stockout")
   averageDailyDemand Float?   @map("average_daily_demand")
   confidenceLevel    Float?   @map("confidence_level")
@@ -200,8 +200,8 @@ model DemandForecast {
 }
 
 model Alert {
-  id        String        @id @default(cuid())
-  productId String?       @map("product_id")
+  id        Int           @id @default(autoincrement())
+  productId Int?          @map("product_id")
   userId    Int?          @map("user_id")
   type      AlertType
   title     String
@@ -221,7 +221,7 @@ model Alert {
 }
 
 model SystemSetting {
-  id           String      @id @default(cuid())
+  id           Int         @id @default(autoincrement())
   settingKey   String      @unique @map("setting_key")
   settingValue String      @map("setting_value")
   description  String?

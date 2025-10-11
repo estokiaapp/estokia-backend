@@ -12,7 +12,7 @@ interface SalesFilters {
 }
 
 interface SaleItemData {
-  productId: string
+  productId: number
   quantity: number
   unitPrice: number
 }
@@ -72,7 +72,7 @@ export class SalesRepository {
     return { sales, total }
   }
 
-  async findById(id: string) {
+  async findById(id: number) {
     return await prisma.sale.findUnique({
       where: { id },
       include: {
@@ -135,7 +135,7 @@ export class SalesRepository {
     })
   }
 
-  async updateStatus(id: string, status: 'PENDING' | 'COMPLETED' | 'CANCELLED') {
+  async updateStatus(id: number, status: 'PENDING' | 'COMPLETED' | 'CANCELLED') {
     return await prisma.sale.update({
       where: { id },
       data: { status },
@@ -159,8 +159,8 @@ export class SalesRepository {
     startDate: string
     endDate: string
     groupBy?: 'day' | 'week' | 'month'
-    categoryId?: string
-    supplierId?: string
+    categoryId?: number
+    supplierId?: number
   }) {
     const where: any = {
       saleDate: {
@@ -213,24 +213,23 @@ export class SalesRepository {
     const grouped = new Map()
 
     sales.forEach(sale => {
-      let period: string
       const date = new Date(sale.saleDate)
 
-      switch (groupBy) {
-        case 'day':
-          period = date.toISOString().split('T')[0]
-          break
-        case 'week':
-          const startOfWeek = new Date(date)
-          startOfWeek.setDate(date.getDate() - date.getDay())
-          period = startOfWeek.toISOString().split('T')[0]
-          break
-        case 'month':
-          period = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`
-          break
-        default:
-          period = date.toISOString().split('T')[0]
-      }
+      const period = (() => {
+        switch (groupBy) {
+          case 'day':
+            return date.toISOString().split('T')[0]
+          case 'week': {
+            const startOfWeek = new Date(date)
+            startOfWeek.setDate(date.getDate() - date.getDay())
+            return startOfWeek.toISOString().split('T')[0]
+          }
+          case 'month':
+            return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`
+          default:
+            return date.toISOString().split('T')[0]
+        }
+      })()
 
       if (!grouped.has(period)) {
         grouped.set(period, {
