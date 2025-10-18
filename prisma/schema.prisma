@@ -16,36 +16,10 @@ enum UserType {
   OPERATOR
 }
 
-enum MovementType {
-  IN
-  OUT
-  ADJUSTMENT
-}
-
 enum SaleStatus {
   PENDING
   COMPLETED
   CANCELLED
-}
-
-enum AlertType {
-  LOW_STOCK
-  PREDICTED_STOCKOUT
-  STAGNANT_PRODUCT
-}
-
-enum AlertPriority {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
-enum SettingType {
-  INTEGER
-  STRING
-  BOOLEAN
-  JSON
 }
 
 // Models
@@ -59,9 +33,7 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
   active    Boolean  @default(true)
 
-  stockMovements StockMovement[]
-  sales          Sale[]
-  alerts         Alert[]
+  sales Sale[]
 
   @@map("users")
 }
@@ -78,72 +50,30 @@ model Category {
   @@map("categories")
 }
 
-model Supplier {
-  id        Int      @id @default(autoincrement())
-  name      String
-  taxId     String?  @unique @map("tax_id")
-  email     String?
-  phone     String?
-  address   String?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  active    Boolean  @default(true)
-
-  products Product[]
-
-  @@map("suppliers")
-}
-
 model Product {
-  id            Int      @id @default(autoincrement())
-  name          String
-  sku           String   @unique
-  categoryId    Int?     @map("category_id")
-  supplierId    Int?     @map("supplier_id")
-  costPrice     Float?   @map("cost_price")
-  sellingPrice  Float?   @map("selling_price")
-  currentStock  Int      @default(0) @map("current_stock")
-  minimumStock  Int      @default(0) @map("minimum_stock")
-  maximumStock  Int?     @map("maximum_stock")
-  unitOfMeasure String   @default("UN") @map("unit_of_measure")
-  description   String?
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
-  active        Boolean  @default(true)
+  id                 Int      @id @default(autoincrement())
+  name               String
+  sku                String   @unique
+  categoryId         Int?     @map("category_id")
+  costPrice          Float?   @map("cost_price")
+  sellingPrice       Float?   @map("selling_price")
+  currentStock       Int      @default(0) @map("current_stock")
+  minimumStock       Int      @default(0) @map("minimum_stock")
+  alertThresholdDays Int      @default(7) @map("alert_threshold_days")
+  unitOfMeasure      String   @default("UN") @map("unit_of_measure")
+  description        String?
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  active             Boolean  @default(true)
 
   category        Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  supplier        Supplier?        @relation(fields: [supplierId], references: [id], onDelete: SetNull)
-  stockMovements  StockMovement[]
   saleItems       SaleItem[]
   demandForecasts DemandForecast[]
-  alerts          Alert[]
 
   @@index([sku])
   @@index([categoryId])
-  @@index([supplierId])
   @@index([active])
   @@map("products")
-}
-
-model StockMovement {
-  id           Int          @id @default(autoincrement())
-  productId    Int          @map("product_id")
-  userId       Int          @map("user_id")
-  type         MovementType
-  quantity     Int
-  unitPrice    Float?       @map("unit_price")
-  reason       String?
-  notes        String?
-  movementDate DateTime     @default(now()) @map("movement_date")
-  createdAt    DateTime     @default(now()) @map("created_at")
-
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id], onDelete: Restrict)
-
-  @@index([productId, movementDate(sort: Desc)])
-  @@index([type])
-  @@index([userId])
-  @@map("stock_movements")
 }
 
 model Sale {
@@ -197,38 +127,4 @@ model DemandForecast {
   @@index([productId])
   @@index([calculationDate(sort: Desc)])
   @@map("demand_forecasts")
-}
-
-model Alert {
-  id        Int           @id @default(autoincrement())
-  productId Int?          @map("product_id")
-  userId    Int?          @map("user_id")
-  type      AlertType
-  title     String
-  message   String?
-  priority  AlertPriority @default(MEDIUM)
-  read      Boolean       @default(false)
-  alertDate DateTime      @default(now()) @map("alert_date")
-  createdAt DateTime      @default(now()) @map("created_at")
-
-  product Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user    User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, read])
-  @@index([productId])
-  @@index([type, priority])
-  @@map("alerts")
-}
-
-model SystemSetting {
-  id           Int         @id @default(autoincrement())
-  settingKey   String      @unique @map("setting_key")
-  settingValue String      @map("setting_value")
-  description  String?
-  type         SettingType @default(STRING)
-  createdAt    DateTime    @default(now()) @map("created_at")
-  updatedAt    DateTime    @updatedAt @map("updated_at")
-
-  @@index([settingKey])
-  @@map("system_settings")
 }
