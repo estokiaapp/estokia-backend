@@ -27,12 +27,17 @@ npx prisma migrate dev
 npx prisma generate
 ```
 
-3. Start development server:
+3. Seed the database (optional):
+```bash
+npm run seed
+```
+
+4. Start development server:
 ```bash
 npm run dev
 ```
 
-4. Visit the API:
+5. Visit the API:
 - API Base URL: http://localhost:3000
 - Documentation: http://localhost:3000/docs
 
@@ -91,6 +96,7 @@ curl http://localhost:3000/api/auth/me \
 - `npm run dev` - Start development server with hot reload
 - `npm run build` - Build for production
 - `npm start` - Start production server
+- `npm run seed` - Seed the database with initial data
 - `npx prisma studio` - Open Prisma database browser
 
 ## Project Structure
