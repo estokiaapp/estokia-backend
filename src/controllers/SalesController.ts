@@ -84,13 +84,13 @@ export class SalesController {
 
   createSale = async (request: FastifyRequest<{ Body: CreateSaleBody }>, reply: FastifyReply) => {
     try {
-      const userId = (request as any).user?.id
+      const userId = (request as any).user?.userId
       if (!userId) {
         return reply.status(401).send({ error: 'Authentication required' })
       }
 
       const saleData = {
-        userId,
+        userId: parseInt(userId),
         saleItems: request.body.saleItems,
         ...(request.body.customerInfo !== undefined && { customerInfo: request.body.customerInfo })
       }

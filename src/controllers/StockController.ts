@@ -56,7 +56,7 @@ export class StockController {
     reply: FastifyReply
   ) => {
     try {
-      const userId = (request as any).user?.id
+      const userId = (request as any).user?.userId
       if (!userId) {
         return reply.status(401).send({ error: 'Authentication required' })
       }
@@ -90,7 +90,7 @@ export class StockController {
 
   bulkAdjustStock = async (request: FastifyRequest<{ Body: BulkStockAdjustmentBody }>, reply: FastifyReply) => {
     try {
-      const userId = (request as any).user?.id
+      const userId = (request as any).user?.userId
       if (!userId) {
         return reply.status(401).send({ error: 'Authentication required' })
       }
