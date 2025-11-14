@@ -234,7 +234,7 @@ async function main() {
 
   console.log(`Created ${products.length} products`);
 
-  // Helper function to generate random sales
+  // Helper functions
   const saleStatuses = [SaleStatus.PENDING, SaleStatus.COMPLETED, SaleStatus.CANCELLED];
   const users = [admin, operator];
 
@@ -253,67 +253,96 @@ async function main() {
     return date;
   }
 
-  // Create 100 sales with random data
-  const salesCount = 100;
-  const createdSales = [];
+  // Create sales with controlled distribution for different confidence levels
+  // Products are assigned different confidence levels based on sales volume
 
-  for (let i = 1; i <= salesCount; i++) {
-    const status = getRandomElement(saleStatuses);
-    const user = getRandomElement(users);
-    const saleDate = getRandomDate(90); // Random date within last 90 days
-    const itemCount = getRandomInt(1, 5); // 1 to 5 items per sale
-
-    // Select random products for this sale
-    const saleProducts = [];
-    const usedProductIds = new Set();
-
-    for (let j = 0; j < itemCount; j++) {
-      let product;
-      do {
-        product = getRandomElement(products);
-      } while (usedProductIds.has(product.id));
-
-      usedProductIds.add(product.id);
-
-      const quantity = getRandomInt(1, 10);
-      const unitPrice = product.sellingPrice || 0;
-      const subtotal = quantity * unitPrice;
-
-      saleProducts.push({
-        productId: product.id,
-        quantity,
-        unitPrice,
-        subtotal,
-      });
+  const confidenceLevels = [
+    {
+      name: 'VERY_LOW',
+      products: [products[9]], // Phone Screen Protector
+      salesCount: 5, // 1-7 sales
+      daysBack: 60,
+      description: '❌ Very Low Confidence (5 sales)'
+    },
+    {
+      name: 'LOW',
+      products: [products[3], products[4]], // Cotton T-Shirt, Denim Jeans
+      salesCount: 12, // 8-14 sales
+      daysBack: 60,
+      description: '⚠️ Low Confidence (12 sales)'
+    },
+    {
+      name: 'MEDIUM',
+      products: [products[0], products[6]], // Wireless Mouse, Green Tea
+      salesCount: 22, // 15-29 sales
+      daysBack: 60,
+      description: '🟡 Medium Confidence (22 sales)'
+    },
+    {
+      name: 'HIGH',
+      products: [products[1], products[2]], // USB-C Cable, Bluetooth Headphones
+      salesCount: 45, // 30-59 sales
+      daysBack: 90,
+      description: '🟢 High Confidence (45 sales)'
+    },
+    {
+      name: 'VERY_HIGH',
+      products: [products[5], products[7], products[8]], // Coffee Beans, LED Light Bulb, Garden Hose
+      salesCount: 70, // 60+ sales
+      daysBack: 90,
+      description: '✅ Very High Confidence (70 sales)'
     }
+  ];
 
-    const totalAmount = saleProducts.reduce((sum, item) => sum + item.subtotal, 0);
+  const createdSales = [];
+  let saleNumber = 1;
 
-    const sale = await prisma.sale.create({
-      data: {
-        saleNumber: `SALE-2025-${String(i).padStart(4, '0')}`,
-        userId: user.id,
-        status,
-        saleDate,
-        totalAmount,
-        saleItems: {
-          create: saleProducts,
-        },
-      },
-      include: {
-        saleItems: true,
-      },
-    });
+  console.log('\n📊 Creating sales with different confidence levels:\n');
 
-    createdSales.push(sale);
+  for (const level of confidenceLevels) {
+    console.log(`${level.description}`);
 
-    // Log progress every 20 sales
-    if (i % 20 === 0) {
-      console.log(`Created ${i}/${salesCount} sales...`);
+    for (const product of level.products) {
+      // Create specified number of sales for this product
+      for (let i = 0; i < level.salesCount; i++) {
+        const status = getRandomElement(saleStatuses);
+        const user = getRandomElement(users);
+        const saleDate = getRandomDate(level.daysBack);
+        const quantity = getRandomInt(1, 5);
+        const unitPrice = product.sellingPrice || 0;
+        const subtotal = Math.round(quantity * unitPrice * 100) / 100;
+        const totalAmount = subtotal;
+
+        const sale = await prisma.sale.create({
+          data: {
+            saleNumber: `SALE-2025-${String(saleNumber).padStart(4, '0')}`,
+            userId: user.id,
+            status,
+            saleDate,
+            totalAmount,
+            saleItems: {
+              create: [{
+                productId: product.id,
+                quantity,
+                unitPrice,
+                subtotal,
+              }]
+            },
+          },
+          include: {
+            saleItems: true,
+          },
+        });
+
+        createdSales.push(sale);
+        saleNumber++;
+      }
+
+      console.log(`  - ${product.name}: ${level.salesCount} sales`);
     }
   }
 
-  console.log(`Created ${createdSales.length} sales with ${createdSales.reduce((sum, sale) => sum + sale.saleItems.length, 0)} total items`);
+  console.log(`\n✅ Created ${createdSales.length} total sales\n`);
 
   // Count sales by status
   const statusCounts = createdSales.reduce((acc, sale) => {
@@ -323,67 +352,8 @@ async function main() {
 
   console.log('Sales by status:', statusCounts);
 
-  // Create demand forecasts
-  await Promise.all([
-    prisma.demandForecast.create({
-      data: {
-        productId: products[0].id, // Wireless Mouse
-        daysToStockout: 45,
-        averageDailyDemand: 3.5,
-        confidenceLevel: 0.85,
-        historicalData: JSON.stringify([
-          { date: '2025-01-01', quantity: 3 },
-          { date: '2025-01-02', quantity: 4 },
-          { date: '2025-01-03', quantity: 3 },
-        ]),
-        calculationDate: new Date(),
-      },
-    }),
-    prisma.demandForecast.create({
-      data: {
-        productId: products[1].id, // USB-C Cable
-        daysToStockout: 60,
-        averageDailyDemand: 5.0,
-        confidenceLevel: 0.90,
-        historicalData: JSON.stringify([
-          { date: '2025-01-01', quantity: 5 },
-          { date: '2025-01-02', quantity: 6 },
-          { date: '2025-01-03', quantity: 4 },
-        ]),
-        calculationDate: new Date(),
-      },
-    }),
-    prisma.demandForecast.create({
-      data: {
-        productId: products[9].id, // Screen Protector (low stock)
-        daysToStockout: 3,
-        averageDailyDemand: 4.0,
-        confidenceLevel: 0.75,
-        historicalData: JSON.stringify([
-          { date: '2025-01-01', quantity: 3 },
-          { date: '2025-01-02', quantity: 5 },
-          { date: '2025-01-03', quantity: 4 },
-        ]),
-        calculationDate: new Date(),
-      },
-    }),
-    prisma.demandForecast.create({
-      data: {
-        productId: products[5].id, // Coffee Beans
-        daysToStockout: 20,
-        averageDailyDemand: 6.0,
-        confidenceLevel: 0.88,
-        historicalData: JSON.stringify([
-          { date: '2025-01-01', quantity: 6 },
-          { date: '2025-01-02', quantity: 7 },
-          { date: '2025-01-03', quantity: 5 },
-        ]),
-        calculationDate: new Date(),
-      },
-    }),
-  ]);
-
-  console.log('Created demand forecasts');
+  // Note: Demand forecasts are now created by the ML prediction script (POST /api/predictions/sales/:userId)
+  // The forecasts require userId and use ConfidenceLevel enum (VERY_LOW, LOW, MEDIUM, HIGH, VERY_HIGH)
 
   console.log('\n=== Seed completed successfully! ===');
   console.log('\nDefault credentials:');
@@ -393,8 +363,14 @@ async function main() {
   console.log('- 2 users (1 admin, 1 operator)');
   console.log('- 4 categories');
   console.log('- 10 products');
-  console.log(`- ${createdSales.length} sales with multiple items`);
-  console.log('- 4 demand forecasts');
+  console.log(`- ${createdSales.length} sales distributed across confidence levels`);
+  console.log('\n📊 Sales Distribution for ML Confidence Testing:');
+  console.log('  ❌ VERY_LOW (5 sales): Phone Screen Protector');
+  console.log('  ⚠️  LOW (12 sales): Cotton T-Shirt, Denim Jeans');
+  console.log('  🟡 MEDIUM (22 sales): Wireless Mouse, Green Tea');
+  console.log('  🟢 HIGH (45 sales): USB-C Cable, Bluetooth Headphones');
+  console.log('  ✅ VERY_HIGH (70 sales): Coffee Beans, LED Light Bulb, Garden Hose');
+  console.log('\n💡 Run ML predictions: POST /api/predictions/sales/:userId');
 }
 
 main()
