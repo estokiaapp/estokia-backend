@@ -29,4 +29,35 @@ export async function predictionRoutes(fastify: FastifyInstance) {
     },
     predictionController.getUserPredictions.bind(predictionController)
   )
+
+  // POST /api/predictions/daily - Run daily predictions for all users
+  fastify.post(
+    '/predictions/daily',
+    {
+      schema: {
+        description: 'Run daily predictions for all users',
+        tags: ['predictions'],
+        response: {
+          200: {
+            description: 'Daily predictions completed successfully',
+            type: 'object',
+            properties: {
+              message: { type: 'string' },
+              execution_output: { type: 'string' }
+            }
+          },
+          500: {
+            description: 'Internal server error',
+            type: 'object',
+            properties: {
+              error: { type: 'string' },
+              message: { type: 'string' },
+              details: { type: 'string' }
+            }
+          }
+        }
+      }
+    },
+    predictionController.runDailyPredictions.bind(predictionController)
+  )
 }

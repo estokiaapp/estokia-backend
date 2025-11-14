@@ -88,6 +88,7 @@ npm run dev
 ### Demand Forecasts (ML-powered)
 - `GET /api/predictions/sales/:userId` - Get demand forecasts for user (🔒 requires JWT)
 - `POST /api/predictions/sales/:userId` - Run ML prediction for user (🔒 requires JWT)
+- `POST /api/predictions/daily` - Run daily predictions for all users (🔒 requires JWT)
 
 ### Logs & Analytics
 - `GET /api/logs` - Get system logs with filters (🔒 requires JWT)
@@ -213,28 +214,34 @@ The API is set up with comprehensive TypeScript configuration, ESM modules, and 
 
 After running `npm run seed`, the database contains:
 - 2 users (admin and operator)
-- 4 categories (Electronics, Clothing, Food & Beverages, Home & Garden)
-- 10 products
+- 4 categories (Periféricos, Hardware de PC, Videogames, Apple)
+- 10 tech products (in Portuguese)
 - 373 sales distributed across different confidence levels for ML testing:
-  - **VERY_LOW** (5 sales): Phone Screen Protector
-  - **LOW** (12 sales each): Cotton T-Shirt, Denim Jeans
-  - **MEDIUM** (22 sales each): Wireless Mouse, Green Tea
-  - **HIGH** (45 sales each): USB-C Cable, Bluetooth Headphones
-  - **VERY_HIGH** (70 sales each): Coffee Beans, LED Light Bulb, Garden Hose
+  - **VERY_LOW** (5 sales): Película de Vidro
+  - **LOW** (12 sales each): Teclado Mecânico RGB, Fone Bluetooth Premium
+  - **MEDIUM** (22 sales each): Mouse Gamer RGB, SSD 480GB SATA
+  - **HIGH** (45 sales each): Memória RAM 16GB DDR4, PlayStation 5
+  - **VERY_HIGH** (70 sales each): Xbox Series X, MacBook Pro M3, iPhone 15 Pro
 
 ### ML Predictions
 
-To generate demand forecasts:
+**Generate forecasts for a specific user:**
 ```bash
 curl -X POST http://localhost:8080/api/predictions/sales/1 \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
-This runs a Python ML script that:
-1. Analyzes historical sales data
-2. Calculates average daily demand
-3. Assigns confidence levels based on data volume
-4. Stores forecasts in the database
+**Run daily predictions for all users:**
+```bash
+curl -X POST http://localhost:8080/api/predictions/daily \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+The prediction scripts:
+1. Analyze historical sales data
+2. Calculate average daily demand
+3. Assign confidence levels based on data volume
+4. Store forecasts in the database
 
 ## Tech Stack
 

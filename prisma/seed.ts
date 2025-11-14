@@ -43,31 +43,31 @@ async function main() {
   console.log('Created users:', { admin: admin.email, operator: operator.email });
 
   // Create categories
-  const electronics = await prisma.category.create({
+  const peripherals = await prisma.category.create({
     data: {
-      name: 'Electronics',
-      description: 'Electronic devices and accessories',
+      name: 'Periféricos',
+      description: 'Periféricos para computador e gaming',
     },
   });
 
-  const clothing = await prisma.category.create({
+  const hardware = await prisma.category.create({
     data: {
-      name: 'Clothing',
-      description: 'Apparel and fashion items',
+      name: 'Hardware de PC',
+      description: 'Componentes e hardware para computadores',
     },
   });
 
-  const food = await prisma.category.create({
+  const videogames = await prisma.category.create({
     data: {
-      name: 'Food & Beverages',
-      description: 'Food products and drinks',
+      name: 'Videogames',
+      description: 'Consoles e jogos',
     },
   });
 
-  const home = await prisma.category.create({
+  const apple = await prisma.category.create({
     data: {
-      name: 'Home & Garden',
-      description: 'Home improvement and garden supplies',
+      name: 'Apple',
+      description: 'Produtos Apple - MacBooks, iPhones, iPads',
     },
   });
 
@@ -75,158 +75,158 @@ async function main() {
 
   // Create products
   const products = await Promise.all([
-    // Electronics
+    // Periféricos
     prisma.product.create({
       data: {
-        name: 'Wireless Mouse',
-        sku: 'ELEC-001',
-        categoryId: electronics.id,
-        costPrice: 15.0,
-        sellingPrice: 29.99,
+        name: 'Mouse Gamer RGB',
+        sku: 'PER-001',
+        categoryId: peripherals.id,
+        costPrice: 45.0,
+        sellingPrice: 89.99,
         currentStock: 150,
         minimumStock: 20,
         alertThresholdDays: 7,
         unitOfMeasure: 'UN',
-        description: 'Ergonomic wireless mouse with USB receiver',
+        description: 'Mouse gamer RGB 12000 DPI com 7 botões programáveis',
         active: true,
       },
     }),
     prisma.product.create({
       data: {
-        name: 'USB-C Cable',
-        sku: 'ELEC-002',
-        categoryId: electronics.id,
-        costPrice: 5.0,
-        sellingPrice: 12.99,
-        currentStock: 300,
-        minimumStock: 50,
+        name: 'Teclado Mecânico RGB',
+        sku: 'PER-002',
+        categoryId: peripherals.id,
+        costPrice: 120.0,
+        sellingPrice: 249.99,
+        currentStock: 80,
+        minimumStock: 15,
         alertThresholdDays: 10,
         unitOfMeasure: 'UN',
-        description: '1m USB-C charging cable',
+        description: 'Teclado mecânico RGB switch azul ABNT2',
         active: true,
       },
     }),
     prisma.product.create({
       data: {
-        name: 'Bluetooth Headphones',
-        sku: 'ELEC-003',
-        categoryId: electronics.id,
-        costPrice: 35.0,
-        sellingPrice: 79.99,
+        name: 'Fone Bluetooth Premium',
+        sku: 'PER-003',
+        categoryId: peripherals.id,
+        costPrice: 150.0,
+        sellingPrice: 299.99,
         currentStock: 45,
         minimumStock: 10,
         alertThresholdDays: 14,
         unitOfMeasure: 'UN',
-        description: 'Over-ear noise cancelling headphones',
+        description: 'Fone de ouvido Bluetooth com cancelamento de ruído',
         active: true,
       },
     }),
-    // Clothing
+    // Hardware de PC
     prisma.product.create({
       data: {
-        name: 'Cotton T-Shirt',
-        sku: 'CLO-001',
-        categoryId: clothing.id,
-        costPrice: 8.0,
-        sellingPrice: 19.99,
+        name: 'SSD 480GB SATA',
+        sku: 'HW-001',
+        categoryId: hardware.id,
+        costPrice: 130.0,
+        sellingPrice: 259.99,
         currentStock: 200,
         minimumStock: 30,
         alertThresholdDays: 7,
         unitOfMeasure: 'UN',
-        description: '100% cotton basic t-shirt',
+        description: 'SSD 480GB SATA III 6Gb/s leitura 550MB/s',
         active: true,
       },
     }),
     prisma.product.create({
       data: {
-        name: 'Denim Jeans',
-        sku: 'CLO-002',
-        categoryId: clothing.id,
-        costPrice: 25.0,
-        sellingPrice: 59.99,
-        currentStock: 80,
-        minimumStock: 15,
-        alertThresholdDays: 14,
-        unitOfMeasure: 'UN',
-        description: 'Classic fit denim jeans',
-        active: true,
-      },
-    }),
-    // Food & Beverages
-    prisma.product.create({
-      data: {
-        name: 'Organic Coffee Beans',
-        sku: 'FOOD-001',
-        categoryId: food.id,
-        costPrice: 10.0,
-        sellingPrice: 24.99,
+        name: 'Memória RAM 16GB DDR4',
+        sku: 'HW-002',
+        categoryId: hardware.id,
+        costPrice: 180.0,
+        sellingPrice: 349.99,
         currentStock: 120,
         minimumStock: 25,
-        alertThresholdDays: 5,
-        unitOfMeasure: 'KG',
-        description: 'Premium arabica coffee beans',
-        active: true,
-      },
-    }),
-    prisma.product.create({
-      data: {
-        name: 'Green Tea',
-        sku: 'FOOD-002',
-        categoryId: food.id,
-        costPrice: 6.0,
-        sellingPrice: 14.99,
-        currentStock: 90,
-        minimumStock: 20,
-        alertThresholdDays: 7,
-        unitOfMeasure: 'BOX',
-        description: 'Organic green tea - 20 bags',
-        active: true,
-      },
-    }),
-    // Home & Garden
-    prisma.product.create({
-      data: {
-        name: 'LED Light Bulb',
-        sku: 'HOME-001',
-        categoryId: home.id,
-        costPrice: 4.0,
-        sellingPrice: 9.99,
-        currentStock: 250,
-        minimumStock: 40,
-        alertThresholdDays: 10,
-        unitOfMeasure: 'UN',
-        description: 'Energy efficient LED bulb 10W',
-        active: true,
-      },
-    }),
-    prisma.product.create({
-      data: {
-        name: 'Garden Hose',
-        sku: 'HOME-002',
-        categoryId: home.id,
-        costPrice: 15.0,
-        sellingPrice: 34.99,
-        currentStock: 30,
-        minimumStock: 8,
         alertThresholdDays: 14,
         unitOfMeasure: 'UN',
-        description: '15m expandable garden hose',
+        description: 'Memória RAM 16GB DDR4 3200MHz para desktop',
+        active: true,
+      },
+    }),
+    // Videogames
+    prisma.product.create({
+      data: {
+        name: 'PlayStation 5',
+        sku: 'GAME-001',
+        categoryId: videogames.id,
+        costPrice: 2800.0,
+        sellingPrice: 4199.99,
+        currentStock: 25,
+        minimumStock: 5,
+        alertThresholdDays: 5,
+        unitOfMeasure: 'UN',
+        description: 'Console PlayStation 5 com leitor de disco',
+        active: true,
+      },
+    }),
+    prisma.product.create({
+      data: {
+        name: 'Xbox Series X',
+        sku: 'GAME-002',
+        categoryId: videogames.id,
+        costPrice: 2600.0,
+        sellingPrice: 3999.99,
+        currentStock: 30,
+        minimumStock: 8,
+        alertThresholdDays: 7,
+        unitOfMeasure: 'UN',
+        description: 'Console Xbox Series X 1TB',
+        active: true,
+      },
+    }),
+    // Apple
+    prisma.product.create({
+      data: {
+        name: 'MacBook Pro M3',
+        sku: 'APPLE-001',
+        categoryId: apple.id,
+        costPrice: 9500.0,
+        sellingPrice: 14999.99,
+        currentStock: 15,
+        minimumStock: 3,
+        alertThresholdDays: 10,
+        unitOfMeasure: 'UN',
+        description: 'MacBook Pro 14" M3 16GB 512GB Space Gray',
+        active: true,
+      },
+    }),
+    prisma.product.create({
+      data: {
+        name: 'iPhone 15 Pro',
+        sku: 'APPLE-002',
+        categoryId: apple.id,
+        costPrice: 5200.0,
+        sellingPrice: 7999.99,
+        currentStock: 40,
+        minimumStock: 10,
+        alertThresholdDays: 7,
+        unitOfMeasure: 'UN',
+        description: 'iPhone 15 Pro 256GB Titânio Natural',
         active: true,
       },
     }),
     // Low stock product for testing alerts
     prisma.product.create({
       data: {
-        name: 'Phone Screen Protector',
-        sku: 'ELEC-004',
-        categoryId: electronics.id,
-        costPrice: 3.0,
-        sellingPrice: 9.99,
+        name: 'Película de Vidro',
+        sku: 'ACESS-001',
+        categoryId: peripherals.id,
+        costPrice: 8.0,
+        sellingPrice: 19.99,
         currentStock: 12,
         minimumStock: 20,
         alertThresholdDays: 5,
         unitOfMeasure: 'UN',
-        description: 'Tempered glass screen protector',
+        description: 'Película de vidro temperado para smartphones',
         active: true,
       },
     }),
@@ -254,91 +254,116 @@ async function main() {
   }
 
   // Create sales with controlled distribution for different confidence levels
-  // Products are assigned different confidence levels based on sales volume
+  // Products are assigned different confidence levels based on UNIQUE SALE DATES (not total sales)
 
   const confidenceLevels = [
     {
       name: 'VERY_LOW',
-      products: [products[9]], // Phone Screen Protector
-      salesCount: 5, // 1-7 sales
+      products: [products[9]], // Película de Vidro
+      uniqueDays: 5, // 1-7 unique days
+      salesPerDay: 1, // Sparse sales
       daysBack: 60,
-      description: '❌ Very Low Confidence (5 sales)'
+      description: '❌ Very Low Confidence (5 unique dates)'
     },
     {
       name: 'LOW',
-      products: [products[3], products[4]], // Cotton T-Shirt, Denim Jeans
-      salesCount: 12, // 8-14 sales
+      products: [products[1], products[2]], // Teclado Mecânico RGB, Fone Bluetooth Premium
+      uniqueDays: 10, // 8-14 unique days
+      salesPerDay: 1,
       daysBack: 60,
-      description: '⚠️ Low Confidence (12 sales)'
+      description: '⚠️ Low Confidence (10 unique dates)'
     },
     {
       name: 'MEDIUM',
-      products: [products[0], products[6]], // Wireless Mouse, Green Tea
-      salesCount: 22, // 15-29 sales
+      products: [products[0], products[3]], // Mouse Gamer RGB, SSD 480GB SATA
+      uniqueDays: 20, // 15-29 unique days
+      salesPerDay: 1,
       daysBack: 60,
-      description: '🟡 Medium Confidence (22 sales)'
+      description: '🟡 Medium Confidence (20 unique dates)'
     },
     {
       name: 'HIGH',
-      products: [products[1], products[2]], // USB-C Cable, Bluetooth Headphones
-      salesCount: 45, // 30-59 sales
+      products: [products[4], products[5]], // Memória RAM 16GB DDR4, PlayStation 5
+      uniqueDays: 40, // 30-59 unique days
+      salesPerDay: 1,
       daysBack: 90,
-      description: '🟢 High Confidence (45 sales)'
+      description: '🟢 High Confidence (40 unique dates)'
     },
     {
       name: 'VERY_HIGH',
-      products: [products[5], products[7], products[8]], // Coffee Beans, LED Light Bulb, Garden Hose
-      salesCount: 70, // 60+ sales
+      products: [products[6], products[7], products[8]], // Xbox Series X, MacBook Pro M3, iPhone 15 Pro
+      uniqueDays: 70, // 60+ unique days
+      salesPerDay: 1, // Can have multiple sales on same day
       daysBack: 90,
-      description: '✅ Very High Confidence (70 sales)'
+      description: '✅ Very High Confidence (70 unique dates)'
     }
   ];
 
   const createdSales = [];
   let saleNumber = 1;
 
-  console.log('\n📊 Creating sales with different confidence levels:\n');
+  console.log('\n📊 Creating sales with guaranteed unique dates for confidence levels:\n');
 
   for (const level of confidenceLevels) {
     console.log(`${level.description}`);
 
     for (const product of level.products) {
-      // Create specified number of sales for this product
-      for (let i = 0; i < level.salesCount; i++) {
-        const status = getRandomElement(saleStatuses);
-        const user = getRandomElement(users);
-        const saleDate = getRandomDate(level.daysBack);
-        const quantity = getRandomInt(1, 5);
-        const unitPrice = product.sellingPrice || 0;
-        const subtotal = Math.round(quantity * unitPrice * 100) / 100;
-        const totalAmount = subtotal;
+      // Generate unique dates for this product
+      const uniqueDates: Date[] = [];
+      const usedDayOffsets = new Set<number>();
 
-        const sale = await prisma.sale.create({
-          data: {
-            saleNumber: `SALE-2025-${String(saleNumber).padStart(4, '0')}`,
-            userId: user.id,
-            status,
-            saleDate,
-            totalAmount,
-            saleItems: {
-              create: [{
-                productId: product.id,
-                quantity,
-                unitPrice,
-                subtotal,
-              }]
-            },
-          },
-          include: {
-            saleItems: true,
-          },
-        });
-
-        createdSales.push(sale);
-        saleNumber++;
+      // Ensure we get exactly uniqueDays different dates
+      while (uniqueDates.length < level.uniqueDays) {
+        const dayOffset = Math.floor(Math.random() * level.daysBack);
+        if (!usedDayOffsets.has(dayOffset)) {
+          const date = new Date();
+          date.setDate(date.getDate() - dayOffset);
+          date.setHours(getRandomInt(8, 20), getRandomInt(0, 59), getRandomInt(0, 59));
+          uniqueDates.push(date);
+          usedDayOffsets.add(dayOffset);
+        }
       }
 
-      console.log(`  - ${product.name}: ${level.salesCount} sales`);
+      // Create sales on each unique date
+      for (const saleDate of uniqueDates) {
+        // Create 1-2 sales per date (to simulate realistic sales patterns)
+        const salesThisDay = level.salesPerDay + (Math.random() > 0.7 ? 1 : 0);
+
+        for (let s = 0; s < salesThisDay; s++) {
+          const status = getRandomElement(saleStatuses);
+          const user = getRandomElement(users);
+          const quantity = getRandomInt(1, 5);
+          const unitPrice = product.sellingPrice || 0;
+          const subtotal = Math.round(quantity * unitPrice * 100) / 100;
+          const totalAmount = subtotal;
+
+          const sale = await prisma.sale.create({
+            data: {
+              saleNumber: `SALE-2025-${String(saleNumber).padStart(4, '0')}`,
+              userId: user.id,
+              status,
+              saleDate,
+              totalAmount,
+              saleItems: {
+                create: [{
+                  productId: product.id,
+                  quantity,
+                  unitPrice,
+                  subtotal,
+                }]
+              },
+            },
+            include: {
+              saleItems: true,
+            },
+          });
+
+          createdSales.push(sale);
+          saleNumber++;
+        }
+      }
+
+      console.log(`  - ${product.name}: ${uniqueDates.length} unique dates, ${level.uniqueDays * level.salesPerDay} total sales`);
     }
   }
 
@@ -362,15 +387,18 @@ async function main() {
   console.log('\nDatabase seeded with:');
   console.log('- 2 users (1 admin, 1 operator)');
   console.log('- 4 categories');
-  console.log('- 10 products');
+  console.log('- 10 products (tech products in pt-BR)');
   console.log(`- ${createdSales.length} sales distributed across confidence levels`);
-  console.log('\n📊 Sales Distribution for ML Confidence Testing:');
-  console.log('  ❌ VERY_LOW (5 sales): Phone Screen Protector');
-  console.log('  ⚠️  LOW (12 sales): Cotton T-Shirt, Denim Jeans');
-  console.log('  🟡 MEDIUM (22 sales): Wireless Mouse, Green Tea');
-  console.log('  🟢 HIGH (45 sales): USB-C Cable, Bluetooth Headphones');
-  console.log('  ✅ VERY_HIGH (70 sales): Coffee Beans, LED Light Bulb, Garden Hose');
-  console.log('\n💡 Run ML predictions: POST /api/predictions/sales/:userId');
+  console.log('\n📊 Sales Distribution for ML Confidence Testing (UNIQUE DATES):');
+  console.log('  ❌ VERY_LOW (5 unique dates): Película de Vidro');
+  console.log('  ⚠️  LOW (10 unique dates): Teclado Mecânico RGB, Fone Bluetooth Premium');
+  console.log('  🟡 MEDIUM (20 unique dates): Mouse Gamer RGB, SSD 480GB SATA');
+  console.log('  🟢 HIGH (40 unique dates): Memória RAM 16GB DDR4, PlayStation 5');
+  console.log('  ✅ VERY_HIGH (70 unique dates): Xbox Series X, MacBook Pro M3, iPhone 15 Pro');
+  console.log('\n💡 Next steps:');
+  console.log('  1. Run ML predictions: cd ../estokia-ml && source venv/bin/activate');
+  console.log('  2. Generate forecasts: python run_daily_predictions.py');
+  console.log('  3. Check API: GET /api/predictions/sales/:userId');
 }
 
 main()

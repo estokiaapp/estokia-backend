@@ -1,7 +1,11 @@
 import type { FastifyRequest, FastifyReply } from 'fastify'
 import { spawn } from 'child_process'
 import * as path from 'path'
+import { fileURLToPath } from 'url'
 import { PrismaClient } from '@prisma/client'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const prisma = new PrismaClient()
 
@@ -178,6 +182,43 @@ export class PredictionController {
   }
 
   /**
+   * Run daily predictions for all users
+   * POST /api/predictions/daily
+   */
+  async runDailyPredictions(
+    _request: FastifyRequest,
+    reply: FastifyReply
+  ) {
+    try {
+      // Path to the ML Python script
+      const mlProjectPath = path.resolve(__dirname, '../../../estokia-ml')
+      const pythonScript = path.join(mlProjectPath, 'run_daily_predictions.py')
+
+      // Execute Python script without user_id parameter
+      const result = await this.executePythonScriptNoParams(pythonScript, mlProjectPath)
+
+      if (result.success) {
+        return reply.status(200).send({
+          message: 'Daily predictions completed successfully',
+          execution_output: result.output
+        })
+      } else {
+        return reply.status(500).send({
+          error: 'Daily prediction execution failed',
+          message: result.error,
+          details: result.output
+        })
+      }
+    } catch (error) {
+      console.error('Error in runDailyPredictions:', error)
+      return reply.status(500).send({
+        error: 'Internal server error',
+        message: error instanceof Error ? error.message : 'Unknown error occurred'
+      })
+    }
+  }
+
+  /**
    * Execute Python script and return results
    */
   private executePythonScript(
@@ -189,6 +230,56 @@ export class PredictionController {
       // Use the virtual environment's Python interpreter
       const pythonPath = path.join(workingDir, 'venv', 'bin', 'python3')
       const pythonProcess = spawn(pythonPath, [scriptPath, userId.toString()], {
+        cwd: workingDir
+      })
+
+      let output = ''
+      let errorOutput = ''
+
+      pythonProcess.stdout.on('data', (data) => {
+        output += data.toString()
+      })
+
+      pythonProcess.stderr.on('data', (data) => {
+        errorOutput += data.toString()
+      })
+
+      pythonProcess.on('close', (code) => {
+        if (code === 0) {
+          resolve({
+            success: true,
+            output: output
+          })
+        } else {
+          resolve({
+            success: false,
+            output: output,
+            error: errorOutput || `Process exited with code ${code}`
+          })
+        }
+      })
+
+      pythonProcess.on('error', (error) => {
+        resolve({
+          success: false,
+          output: output,
+          error: error.message
+        })
+      })
+    })
+  }
+
+  /**
+   * Execute Python script without parameters
+   */
+  private executePythonScriptNoParams(
+    scriptPath: string,
+    workingDir: string
+  ): Promise<{ success: boolean; output: string; error?: string }> {
+    return new Promise((resolve) => {
+      // Use the virtual environment's Python interpreter
+      const pythonPath = path.join(workingDir, 'venv', 'bin', 'python3')
+      const pythonProcess = spawn(pythonPath, [scriptPath], {
         cwd: workingDir
       })
 
