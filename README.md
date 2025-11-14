@@ -1,6 +1,6 @@
 # Estokia Backend API
 
-A RESTful API built with Fastify, Prisma & TypeScript featuring user and post management with comprehensive validation and documentation.
+A RESTful API built with Fastify, Prisma & TypeScript for inventory management with demand forecasting, sales tracking, and comprehensive analytics.
 
 ## Features
 
@@ -13,6 +13,8 @@ A RESTful API built with Fastify, Prisma & TypeScript featuring user and post ma
 - **Password Hashing** - Bcrypt password hashing for security
 - **Validation** - Request validation with custom error handling
 - **Error Handling** - Centralized error handling middleware
+- **ML Integration** - Python-based demand forecasting with confidence levels
+- **MongoDB Logging** - Audit trails and analytics logging
 
 ## Quick Start
 
@@ -38,8 +40,8 @@ npm run dev
 ```
 
 5. Visit the API:
-- API Base URL: http://localhost:3000
-- Documentation: http://localhost:3000/docs
+- API Base URL: http://localhost:8080
+- Documentation: http://localhost:8080/docs
 
 ## API Endpoints
 
@@ -48,46 +50,83 @@ npm run dev
 - `GET /api/auth/me` - Get current user profile (🔒 requires JWT)
 
 ### Users
-- `GET /api/users` - Get all users
-- `GET /api/users/:id` - Get user by ID
-- `POST /api/users` - Create new user (with password)
+- `GET /api/users` - Get all users (🔒 requires JWT)
+- `GET /api/users/:id` - Get user by ID (🔒 requires JWT)
+- `POST /api/users` - Create new user
 - `PUT /api/users/:id` - Update user (🔒 requires JWT)
 - `DELETE /api/users/:id` - Delete user (🔒 requires JWT)
 
-### Posts
-- `GET /api/posts` - Get all posts
-- `GET /api/posts/:id` - Get post by ID
-- `POST /api/posts` - Create new post (🔒 requires JWT)
-- `PUT /api/posts/:id` - Update post (🔒 requires JWT)
-- `DELETE /api/posts/:id` - Delete post (🔒 requires JWT)
+### Categories
+- `GET /api/categories` - Get all categories (🔒 requires JWT)
+- `GET /api/categories/:id` - Get category by ID (🔒 requires JWT)
+- `POST /api/categories` - Create new category (🔒 requires JWT)
+- `PUT /api/categories/:id` - Update category (🔒 requires JWT)
+- `DELETE /api/categories/:id` - Delete category (🔒 requires JWT)
+
+### Products
+- `GET /api/products` - Get all products with filters (🔒 requires JWT)
+- `GET /api/products/:id` - Get product by ID (🔒 requires JWT)
+- `POST /api/products` - Create new product (🔒 requires JWT)
+- `PUT /api/products/:id` - Update product (🔒 requires JWT)
+- `DELETE /api/products/:id` - Delete product (🔒 requires JWT)
+- `GET /api/products/low-stock` - Get products with low stock (🔒 requires JWT)
+
+### Sales
+- `GET /api/sales` - Get all sales with filters (🔒 requires JWT)
+- `GET /api/sales/:id` - Get sale by ID (🔒 requires JWT)
+- `POST /api/sales` - Create new sale (🔒 requires JWT)
+- `PATCH /api/sales/:id/status` - Update sale status (🔒 requires JWT)
+- `GET /api/reports/sales` - Get sales report (🔒 requires JWT)
+- `GET /api/reports/top-products` - Get top selling products (🔒 requires JWT)
+- `GET /api/reports/sales-by-period` - Get sales grouped by period (🔒 requires JWT)
+
+### Stock Management
+- `GET /api/stock/movements` - Get stock movements (🔒 requires JWT)
+- `POST /api/stock/movements` - Record stock movement (🔒 requires JWT)
+- `GET /api/stock/alerts` - Get stock alerts (🔒 requires JWT)
+
+### Demand Forecasts (ML-powered)
+- `GET /api/predictions/sales/:userId` - Get demand forecasts for user (🔒 requires JWT)
+- `POST /api/predictions/sales/:userId` - Run ML prediction for user (🔒 requires JWT)
+
+### Logs & Analytics
+- `GET /api/logs` - Get system logs with filters (🔒 requires JWT)
+- `GET /api/logs/analytics` - Get analytics data (🔒 requires JWT)
 
 ## Example Usage
 
-### Register a User
-```bash
-curl -X POST http://localhost:3000/api/users \
-  -H "Content-Type: application/json" \
-  -d '{"email": "user@example.com", "name": "John Doe", "password": "securepassword123"}'
-```
-
 ### Login
 ```bash
-curl -X POST http://localhost:3000/api/auth/login \
+curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email": "user@example.com", "password": "securepassword123"}'
+  -d '{"email": "admin@estokia.com", "password": "admin123"}'
 ```
 
-### Create a Post (with JWT)
+**Default credentials after seeding:**
+- Admin: `admin@estokia.com` / `admin123`
+- Operator: `operator@estokia.com` / `operator123`
+
+### Create a Product (with JWT)
 ```bash
-curl -X POST http://localhost:3000/api/posts \
+curl -X POST http://localhost:8080/api/products \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{"title": "My Post", "content": "Post content", "authorId": 1, "published": true}'
+  -d '{
+    "name": "Wireless Keyboard",
+    "sku": "ELEC-005",
+    "categoryId": 1,
+    "costPrice": 25.00,
+    "sellingPrice": 49.99,
+    "currentStock": 100,
+    "minimumStock": 15,
+    "alertThresholdDays": 7,
+    "unitOfMeasure": "UN"
+  }'
 ```
 
-### Get Current User Profile
+### Get Demand Forecasts
 ```bash
-curl http://localhost:3000/api/auth/me \
+curl http://localhost:8080/api/predictions/sales/1 \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -96,38 +135,68 @@ curl http://localhost:3000/api/auth/me \
 - `npm run dev` - Start development server with hot reload
 - `npm run build` - Build for production
 - `npm start` - Start production server
-- `npm run seed` - Seed the database with initial data
+- `npm run seed` - Seed the database with test data (373 sales across different confidence levels)
+- `npm test` - Run test suite
+- `npm run test:watch` - Run tests in watch mode
 - `npx prisma studio` - Open Prisma database browser
+- `npx prisma migrate dev` - Create and apply new migration
 
 ## Project Structure
 
 ```
 src/
-├── index.ts              # Main application entry point
+├── index.ts                # Main application entry point
 ├── routes/
-│   ├── auth.ts          # Authentication routes
-│   ├── users.ts         # User routes
-│   └── posts.ts         # Post routes
+│   ├── authRoutes.ts      # Authentication routes
+│   ├── userRoutes.ts      # User management routes
+│   ├── categoryRoutes.ts  # Category routes
+│   ├── productRoutes.ts   # Product routes
+│   ├── salesRoutes.ts     # Sales routes
+│   ├── stockRoutes.ts     # Stock management routes
+│   ├── predictionRoutes.ts # ML prediction routes
+│   └── logRoutes.ts       # Logging and analytics routes
+├── controllers/           # Business logic handlers
+├── services/              # Business logic layer
+├── repositories/          # Data access layer
 ├── middleware/
-│   ├── auth.ts          # JWT authentication middleware
-│   ├── errorHandler.ts  # Global error handling
-│   └── validation.ts    # Validation utilities
-├── utils/
-│   └── auth.ts          # Password hashing utilities
-└── types/
-    └── index.ts         # TypeScript interfaces
+│   ├── auth.ts           # JWT authentication middleware
+│   ├── errorHandler.ts   # Global error handling
+│   └── logging.ts        # Request logging middleware
+├── dto/
+│   └── request/          # Request validation schemas
+├── config/
+│   └── mongodb.ts        # MongoDB connection config
+└── utils/
+    └── auth.ts           # Password hashing utilities
 
 prisma/
-├── schema.prisma        # Database schema
+├── schema.prisma         # Database schema
+├── seed.ts              # Database seeding script
 └── migrations/          # Database migrations
 ```
 
 ## Database Schema
 
-The API uses a simple blog-like schema with Users and Posts:
+The API uses an inventory management schema:
 
-- **User**: id, email, name, password (hashed), createdAt, updatedAt
-- **Post**: id, title, content, published, authorId, createdAt, updatedAt
+- **User**: id, email, name, password (hashed), type (ADMIN/OPERATOR), active, createdAt, updatedAt
+- **Category**: id, name, description, createdAt, updatedAt
+- **Product**: id, name, sku, categoryId, costPrice, sellingPrice, currentStock, minimumStock, alertThresholdDays, unitOfMeasure, description, active, createdAt, updatedAt
+- **Sale**: id, saleNumber, userId, totalAmount, status (PENDING/COMPLETED/CANCELLED), saleDate, createdAt, updatedAt
+- **SaleItem**: id, saleId, productId, quantity, unitPrice, subtotal, createdAt
+- **DemandForecast**: id, productId, userId, daysToStockout, averageDailyDemand, confidenceLevel (VERY_LOW/LOW/MEDIUM/HIGH/VERY_HIGH), calculationDate, createdAt
+
+### Confidence Levels
+
+The ML forecasting system assigns confidence levels based on historical data:
+
+| Level | Sales Records | Expected R² | Description |
+|-------|---------------|-------------|-------------|
+| VERY_LOW | 1-7 | < 0.3 | Insufficient data |
+| LOW | 8-14 | 0.3-0.5 | Fair predictions |
+| MEDIUM | 15-29 | 0.5-0.7 | Good predictions |
+| HIGH | 30-59 | 0.7-0.85 | Reliable forecasts |
+| VERY_HIGH | 60+ | > 0.85 | Highly accurate |
 
 ## Security
 
@@ -139,3 +208,39 @@ The API uses a simple blog-like schema with Users and Posts:
 ## Development
 
 The API is set up with comprehensive TypeScript configuration, ESM modules, and includes validation, error handling, and API documentation out of the box.
+
+### Seeded Data
+
+After running `npm run seed`, the database contains:
+- 2 users (admin and operator)
+- 4 categories (Electronics, Clothing, Food & Beverages, Home & Garden)
+- 10 products
+- 373 sales distributed across different confidence levels for ML testing:
+  - **VERY_LOW** (5 sales): Phone Screen Protector
+  - **LOW** (12 sales each): Cotton T-Shirt, Denim Jeans
+  - **MEDIUM** (22 sales each): Wireless Mouse, Green Tea
+  - **HIGH** (45 sales each): USB-C Cable, Bluetooth Headphones
+  - **VERY_HIGH** (70 sales each): Coffee Beans, LED Light Bulb, Garden Hose
+
+### ML Predictions
+
+To generate demand forecasts:
+```bash
+curl -X POST http://localhost:8080/api/predictions/sales/1 \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+This runs a Python ML script that:
+1. Analyzes historical sales data
+2. Calculates average daily demand
+3. Assigns confidence levels based on data volume
+4. Stores forecasts in the database
+
+## Tech Stack
+
+- **Backend**: Node.js, Fastify, TypeScript
+- **Database**: SQLite (Prisma ORM)
+- **Logging**: MongoDB
+- **ML**: Python (scikit-learn, pandas)
+- **Testing**: Vitest
+- **Documentation**: Swagger/OpenAPI
