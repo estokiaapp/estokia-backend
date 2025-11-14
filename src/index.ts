@@ -10,6 +10,7 @@ import { categoryRoutes } from './routes/categoryRoutes.js'
 import { salesRoutes } from './routes/salesRoutes.js'
 import { stockRoutes } from './routes/stockRoutes.js'
 import { logRoutes } from './routes/logRoutes.js'
+import { predictionRoutes } from './routes/predictionRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { authenticate } from './middleware/auth.js'
 import { loggingMiddleware } from './middleware/logging.js'
@@ -105,6 +106,7 @@ async function start() {
     await fastify.register(salesRoutes, { prefix: '/api'})
     await fastify.register(stockRoutes, { prefix: '/api'})
     await fastify.register(logRoutes, { prefix: '/api'})
+    await fastify.register(predictionRoutes, { prefix: '/api'})
 
     const port = process.env.PORT ? parseInt(process.env.PORT) : 8080
     const host = process.env.HOST || '0.0.0.0'

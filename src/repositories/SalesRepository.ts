@@ -104,10 +104,10 @@ export class SalesRepository {
       productId: item.productId,
       quantity: item.quantity,
       unitPrice: item.unitPrice,
-      subtotal: item.quantity * item.unitPrice
+      subtotal: Math.round(item.quantity * item.unitPrice * 100) / 100
     }))
 
-    const totalAmount = saleItems.reduce((sum, item) => sum + item.subtotal, 0)
+    const totalAmount = Math.round(saleItems.reduce((sum, item) => sum + item.subtotal, 0) * 100) / 100
 
     return await prisma.sale.create({
       data: {

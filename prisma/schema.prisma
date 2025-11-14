@@ -22,6 +22,14 @@ enum SaleStatus {
   CANCELLED
 }
 
+enum ConfidenceLevel {
+  VERY_LOW
+  LOW
+  MEDIUM
+  HIGH
+  VERY_HIGH
+}
+
 // Models
 model User {
   id        Int      @id @default(autoincrement())
@@ -33,7 +41,8 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
   active    Boolean  @default(true)
 
-  sales Sale[]
+  sales           Sale[]
+  demandForecasts DemandForecast[]
 
   @@map("users")
 }
@@ -113,18 +122,22 @@ model SaleItem {
 }
 
 model DemandForecast {
-  id                 Int      @id @default(autoincrement())
-  productId          Int      @map("product_id")
-  daysToStockout     Int?     @map("days_to_stockout")
-  averageDailyDemand Float?   @map("average_daily_demand")
-  confidenceLevel    Float?   @map("confidence_level")
-  historicalData     String?  @map("historical_data")
-  calculationDate    DateTime @default(now()) @map("calculation_date")
-  createdAt          DateTime @default(now()) @map("created_at")
+  id                 Int              @id @default(autoincrement())
+  productId          Int              @map("product_id")
+  userId             Int              @map("user_id")
+  daysToStockout     Int?             @map("days_to_stockout")
+  averageDailyDemand Float?           @map("average_daily_demand")
+  confidenceLevel    ConfidenceLevel? @map("confidence_level")
+  historicalData     String?          @map("historical_data")
+  calculationDate    DateTime         @default(now()) @map("calculation_date")
+  createdAt          DateTime         @default(now()) @map("created_at")
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, productId])
   @@index([productId])
+  @@index([userId])
   @@index([calculationDate(sort: Desc)])
   @@map("demand_forecasts")
 }
